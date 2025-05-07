@@ -14,24 +14,19 @@ export default defineConfig({
         },
         shared: {
           "react": {
-            singleton: true,
             requiredVersion: "^19.1.0",
           },
           "react-dom": {
-            singleton: true,
             requiredVersion: "^19.1.0",
           },
           "react-router-dom": {
-            singleton: true,
             requiredVersion: "^6.0.0",
           },
           "jotai": {
-            singleton: true,
             requiredVersion: "^2.12.4",
           },
           "react-icons": {
-            singleton: true,
-            requiredVersion: "^5.5.0",
+            requiredVersion: "^4.10.1",
           }
         },      
       }),

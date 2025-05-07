@@ -1,0 +1,162 @@
+import React, { useState, useEffect, type FormEvent } from 'react';
+import {
+  Form,
+  Button,
+  FloatingLabel,
+  InputGroup,
+  Spinner,
+  Placeholder,
+  Container
+} from 'react-bootstrap';
+import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { userAtom } from '../store/userAtom';
+
+const LoginForm: React.FC = () => {
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState({ username: false, password: false });
+  const [ready, setReady] = useState(false);
+  const [, setUser] = useAtom(userAtom);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+  };
+
+  const validate = () => {
+    const errs: { username?: string; password?: string } = {};
+    if (!formData.username) errs.username = 'Username is required';
+    if (!formData.password) errs.password = 'Password is required';
+    return errs;
+  };
+
+  const errors = validate();
+  const isValid = !errors.username && !errors.password;
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setTouched({ username: true, password: true });
+    setError('');
+    if (!isValid) return;
+
+    setLoading(true);
+    await new Promise(res => setTimeout(res, 1000));
+
+    if (formData.username === 'user' && formData.password === 'password') {
+      setUser({ username: formData.username });
+      navigate('/dashboard');
+    } else {
+      setError('Invalid username or password.');
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <Container fluid className="d-flex align-items-center justify-content-center min-vh-100 bg-dark text-white">
+      {!ready ? (
+        <Placeholder as="div" animation="glow" className="w-100 bg-dark" style={{ maxWidth: 400 }}>
+          <Placeholder xs={12} size="lg" />
+          <Placeholder xs={12} />
+          <Placeholder xs={6} />
+        </Placeholder>
+      ) : (
+        <Form
+          onSubmit={handleSubmit}
+          className="p-4 border rounded shadow-sm w-100 bg-dark text-white"
+          style={{ maxWidth: 400 }}
+          noValidate
+          role="form"
+        >
+          <h3 className="mb-4 text-center">Login</h3>
+          {error && <div className="alert alert-danger text-danger" role="alert">{error}</div>}
+
+          <FloatingLabel controlId="floatingUsername" label="" className="mb-3">
+            <InputGroup hasValidation>
+              <InputGroup.Text className="bg-dark text-white border-secondary">
+                <FaUser />
+              </InputGroup.Text>
+              <Form.Control
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                autoComplete="username"
+                isInvalid={touched.username && !!errors.username}
+                aria-describedby="usernameFeedback"
+                required
+                className="bg-dark text-white border-secondary"
+              />
+              <Form.Control.Feedback type="invalid" id="usernameFeedback">
+                {errors.username}
+              </Form.Control.Feedback>
+            </InputGroup>
+          </FloatingLabel>
+
+          <FloatingLabel controlId="floatingPassword" label="" className="mb-3">
+            <InputGroup hasValidation>
+              <InputGroup.Text className="bg-dark text-white border-secondary">
+                <FaLock />
+              </InputGroup.Text>
+              <Form.Control
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                autoComplete="current-password"
+                isInvalid={touched.password && !!errors.password}
+                required
+                className="bg-dark text-white border-secondary"
+              />
+              <Button
+                variant="outline-light"
+                onClick={() => setShowPassword(!showPassword)}
+                type="button"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </Button>
+              <Form.Control.Feedback type="invalid">
+                {errors.password}
+              </Form.Control.Feedback>
+            </InputGroup>
+          </FloatingLabel>
+
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Form.Check type="checkbox" label="Remember Me" className="text-white" />
+            <Button variant="link" onClick={() => navigate('/signup')} className="p-0 text-warning">
+              Sign Up
+            </Button>
+          </div>
+
+          <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+            {loading ? (
+              <>
+                <Spinner animation="border" size="sm" role="status" aria-hidden="true" /> Logging in...
+              </>
+            ) : 'Login'}
+          </Button>
+        </Form>
+      )}
+    </Container>
+  );
+};
+
+export default LoginForm;
