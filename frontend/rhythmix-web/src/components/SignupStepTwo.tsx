@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, ProgressBar, Badge, Placeholder } from 'react-bootstrap';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { signupFormAtom } from '../store/signupAtom';
+import { useSignupStore } from '../store/signupStore';
 
 const options = {
   genres: ['Pop', 'Rock', 'Hip‑Hop', 'Jazz', 'Classical', 'EDM'],
@@ -12,7 +11,7 @@ const options = {
 };
 
 const SignupStepTwo: React.FC = () => {
-  const [formData, setFormData] = useAtom(signupFormAtom);
+  const { formData, setFormData } = useSignupStore();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
@@ -49,7 +48,7 @@ const SignupStepTwo: React.FC = () => {
       setErrors(newErrors);
       return;
     }
-    navigate('/dashboard');
+    navigate('/home/dashboard');
   };
 
   return (

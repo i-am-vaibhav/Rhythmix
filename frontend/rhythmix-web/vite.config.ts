@@ -7,10 +7,14 @@ export default defineConfig({
       react(),
       federation({
         name: "container",
+        filename: "remoteEntry.js",
         remotes: {
-          home_web: "http://localhost:3000/assets/remoteEntry.js",
+          home_web: "http://localhost:3002/assets/remoteEntry.js",
           library_web: "http://localhost:3001/assets/remoteEntry.js",
-          player_web: "http://localhost:3002/assets/remoteEntry.js",
+          player_web: "http://localhost:3000/assets/remoteEntry.js",
+        },
+        exposes: {
+          "./AuthStore": "./src/store/authStore.ts",
         },
         shared: {
           "react": {
@@ -20,13 +24,13 @@ export default defineConfig({
             requiredVersion: "^19.1.0",
           },
           "react-router-dom": {
-            requiredVersion: "^6.0.0",
+            requiredVersion: "^7.5.3",
           },
-          "jotai": {
-            requiredVersion: "^2.12.4",
+          "zustand": {
+            requiredVersion: "^5.0.4",
           },
           "react-icons": {
-            requiredVersion: "^4.10.1",
+            requiredVersion: "^5.5.0",
           }
         },      
       }),
@@ -35,5 +39,13 @@ export default defineConfig({
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
+    },
+    preview: {
+      host: "localhost",
+      port: 5173,
+      strictPort: true,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     },
 })

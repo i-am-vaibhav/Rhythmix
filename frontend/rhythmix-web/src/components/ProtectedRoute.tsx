@@ -1,6 +1,5 @@
 import React from 'react';
-import { useAtom } from 'jotai';
-import { userAtom } from '../store/userAtom';
+import { useAuthStore } from '../store/authStore';
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
@@ -8,10 +7,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
-  const [user] = useAtom(userAtom);  // Access the userAtom to check if user is logged in
+  const {isAuthenticated} = useAuthStore();  // Access the userAtom to check if user is logged in
 
   // If user is not authenticated, redirect to login page
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/" />;
   }
 

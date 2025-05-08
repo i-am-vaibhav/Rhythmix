@@ -1,14 +1,13 @@
 // src/components/Dashboard.tsx
 import React from 'react';
-import { useAtom } from 'jotai';
-import { userAtom } from '../store/userAtom';
+import { useAuthStore } from 'container/AuthStore';
 import { Navigate } from 'react-router-dom';
 import { Container, Row, Col, Card, InputGroup, FormControl, Button } from 'react-bootstrap';
 import { FaSearch, FaPlay, FaPause, FaStepForward } from 'react-icons/fa';
 
 const Dashboard: React.FC = () => {
-  const [user] = useAtom(userAtom);
-  if (!user) return <Navigate to="/" />;
+  const {userData} = useAuthStore();
+  if (!userData) return <Navigate to="/" />;
 
   // Mock data
   // src/mock/musicData.ts
@@ -87,7 +86,7 @@ const Dashboard: React.FC = () => {
     <Container fluid className="p-3">
       {/* Greeting & Search */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3>Welcome back, {user.username}!</h3>
+        <h3>Welcome back, {userData?.username}!</h3>
         <InputGroup style={{ maxWidth: 300 }}>
           <InputGroup.Text><FaSearch /></InputGroup.Text>
           <FormControl placeholder="Search music" aria-label="Search music"/>

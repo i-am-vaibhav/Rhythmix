@@ -10,8 +10,7 @@ import {
 } from 'react-bootstrap';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { userAtom } from '../store/userAtom';
+import { useAuthStore } from '../store/authStore';
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -20,7 +19,7 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ username: false, password: false });
   const [ready, setReady] = useState(false);
-  const [, setUser] = useAtom(userAtom);
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,8 +56,8 @@ const LoginForm: React.FC = () => {
     await new Promise(res => setTimeout(res, 1000));
 
     if (formData.username === 'user' && formData.password === 'password') {
-      setUser({ username: formData.username });
-      navigate('/dashboard');
+      login({ username: formData.username });
+      navigate('/home/dashboard');
     } else {
       setError('Invalid username or password.');
     }

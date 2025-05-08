@@ -2,11 +2,10 @@ import React, { useState, useEffect, type FormEvent } from 'react';
 import { Form, Button, FloatingLabel, InputGroup, Spinner, Placeholder, Container, ProgressBar } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaLock, FaMobileAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { signupFormAtom } from '../store/signupAtom';
+import { useSignupStore } from '../store/signupStore';
 
 const SignupStepOne: React.FC = () => {
-  const [formData, setFormData] = useAtom(signupFormAtom);
+  const {formData, setFormData} = useSignupStore();
   const [touched, setTouched] = useState({ username: false, email: false, password: false, mobile: false });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
@@ -35,7 +34,7 @@ const SignupStepOne: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ [name]: value });
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
