@@ -6,16 +6,17 @@ import SignupStepTwo from './components/SignupStepTwo';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute component
 import Home from './components/Home';
-import Layout from './components/Layout';
+import GuestLayout from './components/GuestLayout';
 
 const App: React.FC = () => {
+  const guestLayout = (child: React.ReactNode) => (<GuestLayout>{child}</GuestLayout>);
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout><Home /></Layout>} />
-        <Route path="/login" element={<Layout><LoginForm /></Layout>} />
-        <Route path="/signup" element={<Layout><SignupStepOne /></Layout>} />
-        <Route path="/signup-step-two" element={<Layout><SignupStepTwo /></Layout>} />
+        <Route path="/" element={guestLayout(<Home />)} />
+        <Route path="/login" element={guestLayout(<LoginForm />)} />
+        <Route path="/signup" element={guestLayout(<SignupStepOne />)} />
+        <Route path="/signup-step-two" element={guestLayout(<SignupStepTwo />)} />
         <Route 
           path="/dashboard" 
           element={<ProtectedRoute element={<Dashboard />} />} 

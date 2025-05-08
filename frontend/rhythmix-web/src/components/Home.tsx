@@ -2,6 +2,8 @@ import React from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { FaMusic, FaMobileAlt, FaHeadphones } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import Image from 'react-bootstrap/Image';
+import imageSrc from '../assets/logo.png'; 
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -16,10 +18,24 @@ const Home: React.FC = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           height: '100vh',
-          paddingTop: '56px', // To offset the fixed navbar
         }}
       >
         <Container>
+          <Image
+            src={imageSrc}
+            alt="Rhythmix Logo"
+            width={150}
+            height={150}
+            fluid
+            style={{
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))',
+              borderRadius: '12px',
+              objectFit: 'contain',
+              maxWidth: '100%',
+              height: 'auto',
+            }}
+            className="d-block mx-auto"
+          />
           <h1 className="display-4 fw-bold text-primary">Feel the Rhythm</h1>
           <p className="lead">Experience music like never before with personalized playlists and high-quality streaming.</p>
           <div className="d-flex justify-content-center gap-3 mt-4">

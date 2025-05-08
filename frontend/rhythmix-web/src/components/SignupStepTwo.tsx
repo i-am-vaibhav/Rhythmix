@@ -62,7 +62,7 @@ const SignupStepTwo: React.FC = () => {
       ) : (
         <Form
           onSubmit={handleSubmit}
-          className="p-4 border rounded shadow-sm bg-dark text-light w-100"
+          className="p-4 border m-5 rounded shadow-sm bg-dark text-light w-100"
           style={{ maxWidth: 500 }}
           noValidate
         >

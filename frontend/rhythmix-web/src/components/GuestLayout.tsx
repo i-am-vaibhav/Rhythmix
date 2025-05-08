@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Footer from './Footer';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children })  => {
+const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children })  => {
   const navigate = useNavigate();
 
   return (
@@ -27,4 +27,4 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children })  => {
   );
 }
 
-export default Layout;
+export default GuestLayout;

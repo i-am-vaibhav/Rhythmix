@@ -137,6 +137,12 @@ const SignupStepOne: React.FC = () => {
               </Form.Control.Feedback>
             </InputGroup>
           </FloatingLabel>
+          
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Button variant="link" onClick={() => navigate('/login')} className="p-0 text-warning">
+              Already have an account? Log in
+            </Button>
+          </div>
 
           {/* Submit Button */}
           <Button variant="primary" type="submit" className="w-100 py-2" disabled={loading}>
