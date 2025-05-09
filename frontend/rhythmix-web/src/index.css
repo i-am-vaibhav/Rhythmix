@@ -29,6 +29,11 @@ a {
   color: #121212;
 }
 
+.bg-primary{
+  background-color: #FF5722 !important;
+  --bs-bg-opacity: 1;
+}
+
 footer {
   background-color: #121212;
   padding-top: 2rem;

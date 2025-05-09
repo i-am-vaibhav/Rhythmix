@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   rhythmix-home-web:
+    container_name: rhythmix-home-web
     build:
       context: ./frontend/rhythmix-home-web
       dockerfile: DockerFile
@@ -11,7 +12,22 @@ services:
     environment:
       - NODE_ENV=production
 
+  rhythmix-library-web:
+    container_name: rhythmix-library-web
+    build:
+      context: ./frontend/rhythmix-library-web
+      dockerfile: DockerFile
+      target: runner
+    ports:
+      - "3001:3001"              
+    environment:
+      - NODE_ENV=production
+
   rhythmix-web:
+    container_name: rhythmix-web
+    depends_on:
+      - rhythmix-home-web
+      - rhythmix-library-web
     build:
       context: ./frontend/rhythmix-web
       dockerfile: DockerFile
