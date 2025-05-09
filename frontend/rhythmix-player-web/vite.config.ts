@@ -6,29 +6,21 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: "player_web",
+      name: "library_web",
       filename: "remoteEntry.js",
       exposes: {
-        
+        './App': './src/App',
       },
-      shared: {
-        "react": {
-          singleton: true,
-          requiredVersion: "^19.1.0",
-        },
-        "react-icons": {
-          singleton: true,
-          requiredVersion: "^5.5.0",
-        },
-        "react-dom": {
-          singleton: true,
-          requiredVersion: "^19.1.0",
-        },
-        "jotai": {
-          singleton: true,
-          requiredVersion: "^2.12.4",
-        },
-      }, 
+      remotes: {
+        container: 'http://localhost:5173/assets/remoteEntry.js',
+      },
+      shared: [
+        "react",
+        "react-icons",
+        "react-dom",
+        "zustand",
+        "react-router-dom"
+      ], 
     }),
   ],
   build: {
@@ -38,7 +30,7 @@ export default defineConfig({
   },
   preview: {
     host: "localhost",
-    port: 3002,
+    port: 3000,
     strictPort: true,
     headers: {
       "Access-Control-Allow-Origin": "*",
