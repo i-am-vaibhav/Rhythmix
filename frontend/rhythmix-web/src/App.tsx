@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginForm from './components/LoginForm';
+import SignupStepOne from './components/SignupStepOne';
+import SignupStepTwo from './components/SignupStepTwo';
+import ProtectedRoute from './components/ProtectedRoute'; // Import the ProtectedRoute component
+import Home from './components/Home';
+import GuestLayout from './components/GuestLayout';
+import { Spinner } from 'react-bootstrap';
 
-function App() {
-  const [count, setCount] = useState(0)
+const HomeWebApp = lazy(() => import('home_web/App'));
 
+const App: React.FC = () => {
+  const guestLayout = (child: React.ReactNode) => (<GuestLayout>{child}</GuestLayout>);
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={guestLayout(<Home />)} />
+        <Route path="/login" element={guestLayout(<LoginForm />)} />
+        <Route path="/signup" element={guestLayout(<SignupStepOne />)} />
+        <Route path="/signup-step-two" element={guestLayout(<SignupStepTwo />)} />
+        <Route path="/home/*" element={<ProtectedRoute element={
+          <React.Suspense fallback={
+            <Spinner animation="border" size="sm" role="status" aria-hidden="true"> Loading the rhythm...</Spinner>}>
+            <HomeWebApp />
+          </React.Suspense>} />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
