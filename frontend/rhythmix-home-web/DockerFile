@@ -1,28 +1,26 @@
-# Step 1: Build the app using Node
-FROM node:18 AS builder
-
+# Stage 1: install & build
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
+# 1. Install deps
 COPY package*.json ./
-COPY tsconfig.* ./
-COPY vite.config.* ./
-RUN npm install
+RUN npm ci                               
 
-# Copy the rest of the app files
+# 2. Copy source & build
 COPY . .
+RUN npm run build                       
 
-# Build the project
-RUN npm run build
+# Stage 2: serve via vite preview
+FROM node:18-alpine AS runner
+WORKDIR /app
 
-# Step 2: Serve the built app with Nginx
-FROM nginx:stable-alpine
+# Copy built assets + production deps
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+RUN npm ci
 
-# Copy build output to Nginx's default public folder
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Expose the Vite preview port (match your vite.config preview.port)
+EXPOSE 3002                              
 
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# default to preview on all interfaces
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3002"]

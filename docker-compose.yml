@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  rhythmix-home-web:
+    build:
+      context: ./frontend/rhythmix-home-web
+      dockerfile: DockerFile
+      target: runner
+    ports:
+      - "3002:3002"              
+    environment:
+      - NODE_ENV=production
+
+  rhythmix-web:
+    build:
+      context: ./frontend/rhythmix-web
+      dockerfile: DockerFile
+      target: runner
+    ports:
+      - "5173:5173"              
+    environment:
+      - NODE_ENV=production
