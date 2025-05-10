@@ -6,32 +6,27 @@ import {
   Card,
   ProgressBar,
   Form,
-  ListGroup,
   Row,
   Col,
-  Offcanvas,
   Badge,
-  Accordion,
   OverlayTrigger,
   Tooltip,
 } from 'react-bootstrap';
 import {
   FaPlay,
   FaPause,
-  FaStop,
   FaRedo,
   FaVolumeUp,
-  FaTrash,
 } from 'react-icons/fa';
-import { FaShuffle, FaListUl, FaMusic } from 'react-icons/fa6';
+import { FaShuffle, FaListUl } from 'react-icons/fa6';
 import {
-  mockAudioUrl,
   mockLyrics,
   mockSongMetadata,
   type SongMetadata,
 } from '../music/model';
 import '../index.css'
 import LyricsList from './LyricsList';
+import PlayQueue from './PlayQueue';
 
 // Memoize sorted lyrics
 const useLyricsArray = (raw: Record<string,string>) =>
@@ -55,35 +50,46 @@ const MusicPlayer: React.FC = () => {
   const lyricsArray = useLyricsArray(mockLyrics);
 
   const togglePlay = () => { const s = soundRef.current; if (!s) return; s.playing() ? s.pause() : s.play(); };
-  const stop = () => { soundRef.current?.stop(); setProgress(0); };
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => setVolume(parseFloat(e.target.value));
 
   // Offcanvas queue state
   const [showQueue, setShowQueue] = useState(false);
   const toggleQueue = () => setShowQueue(prev => !prev);
 
-  // Drag-and-drop
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const handleDragStart = (i: number) => setDraggedIndex(i);
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
-  const handleDrop = (i: number) => {
-    if (draggedIndex === null || draggedIndex === i) return;
-    setQueue(q => {
-      const arr = [...q];
-      const [m] = arr.splice(draggedIndex, 1);
-      arr.splice(i, 0, m);
-      return arr;
+  const createSound = (song: SongMetadata) => {
+    const sound = new Howl({
+      src: [song.url],
+      html5: true,
+      volume,
+      onplay: () => {
+        setIsPlaying(true);
+        setDuration(sound.duration());
+        updateProgress();
+      },
+      onpause: () => setIsPlaying(false),
+      onstop: () => setIsPlaying(false),
+      onend: () => {
+        if (repeat) {
+          sound.play();
+        } else {
+          const nextSong = dequeue();
+          if (nextSong) {
+            setSongMetadata(nextSong);
+          } else {
+            setIsPlaying(false);
+          }
+        }
+      },
     });
-    setDraggedIndex(null);
-  };
+    return sound;
+  }
 
   // Enqueue and play logic
-  const enqueueAndPlay = (song: SongMetadata) => {
-    setQueue(q => {
-      const newQ = [...q, song];
-      if (!soundRef.current || !soundRef.current.playing()) setSongMetadata(song);
-      return newQ;
-    });
+  const playTrack = (song: SongMetadata) => {
+    soundRef.current?.stop();
+    const sound = createSound(song);
+    soundRef.current = sound;
+    sound.play();
   };
 
   const dequeue = () => {
@@ -124,30 +130,7 @@ const MusicPlayer: React.FC = () => {
 
   // Initialize Howl
   useEffect(() => {
-    const sound = new Howl({
-      src: [mockAudioUrl.mockSong],
-      html5: true,
-      volume,
-      onplay: () => {
-        setIsPlaying(true);
-        setDuration(sound.duration());
-        updateProgress();
-      },
-      onpause: () => setIsPlaying(false),
-      onstop: () => setIsPlaying(false),
-      onend: () => {
-        if (repeat) {
-          sound.play();
-        } else {
-          const nextSong = dequeue();
-          if (nextSong) {
-            setSongMetadata(nextSong);
-          } else {
-            setIsPlaying(false);
-          }
-        }
-      },
-    });
+    const sound = createSound(songMetadata)
 
     soundRef.current = sound;
 
@@ -166,7 +149,6 @@ const MusicPlayer: React.FC = () => {
     soundRef.current?.on('stop', () => clearInterval(iv));
   };
 
-  // Sync lyrics
   // Sync lyrics
   useEffect(() => {
     if (!isPlaying || lyricsArray.length === 0) return;
@@ -235,9 +217,6 @@ const MusicPlayer: React.FC = () => {
                     {isPlaying?<FaPause/>:<FaPlay/>}
                   </Button>
                 </OverlayTrigger>
-                <OverlayTrigger overlay={<Tooltip>Stop</Tooltip>}>
-                  <Button variant="danger" className="rounded-circle btn-rounded-circle" onClick={stop}><FaStop/></Button>
-                </OverlayTrigger>
                 <OverlayTrigger overlay={<Tooltip>Repeat</Tooltip>}>
                   <Button variant={repeat?'warning':'outline-light'} className="rounded-circle btn-rounded-circle" onClick={()=>setRepeat(r=>!r)} aria-pressed={repeat}>
                     <FaRedo/>
@@ -261,23 +240,16 @@ const MusicPlayer: React.FC = () => {
             </Card.Body>
           </Card>
 
-          {/* Offcanvas Queue */}
-          <Offcanvas show={showQueue} onHide={toggleQueue} placement="end" backdrop={false}>
-            <Offcanvas.Header closeButton className="bg-dark text-light">
-              <Offcanvas.Title>Play Queue</Offcanvas.Title>
-            </Offcanvas.Header>
-            <Offcanvas.Body className="bg-dark text-light">
-              <ListGroup variant="flush">
-                {queue.map((song, idx) => (
-                  <ListGroup.Item key={idx} className="d-flex justify-content-between align-items-center bg-transparent text-light" draggable onDragStart={()=>handleDragStart(idx)} onDragOver={handleDragOver} onDrop={()=>handleDrop(idx)} style={{cursor:'grab'}}>
-                    <span style={{fontSize:18}}>⠿</span><span className="ms-2">{song.title}</span>
-                    <Button variant="outline-danger" size="sm" onClick={()=>removeAt(idx)}><FaTrash/></Button>
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-              {queue.length===0 && <div className="text-center mt-4 text-muted">Queue is empty</div>}
-            </Offcanvas.Body>
-          </Offcanvas>
+          {/* Play Queue Offcanvas */}
+          <PlayQueue 
+          queue={queue}
+          show={showQueue}
+          onHide={toggleQueue}
+          onClear={() => setQueue([])}
+          playTrack={playTrack}
+          loading={false}
+          removeAt={removeAt}
+          />
         </Container>
       </Container>
   );
