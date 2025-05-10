@@ -1,0 +1,211 @@
+/* === Root Player Container === */
+.player-container {
+  height: 100vh;
+  width: 100%;
+  background: var(--cover-art) center/cover no-repeat;
+  position: relative;
+  color: var(--bs-body-color);
+}
+
+.player-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+/* === Inner Layout === */
+.inner-container {
+  position: relative;
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 576px) {
+  .inner-container {
+    padding: 1rem;
+  }
+}
+
+/* === Player Card === */
+.player-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+}
+
+.player-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  pointer-events: none;
+}
+
+.player-card:focus-within {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+/* === Card Body === */
+.card-body {
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  border-radius: 1rem;
+  padding: 2rem;
+  color: #f8f9fa;
+  position: relative;
+  z-index: 2;
+}
+
+/* === Album Art === */
+.card-img {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+/* === Song Info === */
+.card-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  color: #adb5bd;
+  margin-bottom: 1.5rem;
+}
+
+/* === Progress Bar === */
+.progress {
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  background-color: #0d6efd;
+}
+
+/* === Time Display === */
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #ced4da;
+  margin-bottom: 1.5rem;
+}
+
+/* === Control Buttons === */
+.btn-rounded-circle {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.btn-rounded-circle:hover {
+  transform: scale(1.1);
+}
+
+/* === Volume === */
+.form-range {
+  width: 100%;
+  accent-color: #0d6efd;
+}
+
+/* === Queue Badge === */
+.position-relative .badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Scrollable List Container */
+.lyrics-scrollable-list {
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+/* Scrollbar Styling */
+.lyrics-scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+.lyrics-scrollable-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+/* List Items */
+.lyrics-item {
+  padding: 0.6rem 1rem;
+  color: #f8f9fa;
+  background-color: transparent;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.lyrics-item:hover,
+.lyrics-item.hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Active Line */
+.lyrics-item.active {
+  background-color: rgba(13, 110, 253, 0.15);
+  font-weight: 600;
+  color: #17a2b8;
+  position: relative;
+}
+
+.lyrics-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #17a2b8;
+  border-radius: 2px 0 0 2px;
+}
+
+/* === Active List Group Override === */
+.list-group-item.active {
+  z-index: 2;
+  color: var(--bs-list-group-active-color);
+  background-color: inherit;
+  border-color: inherit;
+}

@@ -30,6 +30,8 @@ import {
   mockSongMetadata,
   type SongMetadata,
 } from '../music/model';
+import '../index.css'
+import LyricsList from './LyricsList';
 
 // Memoize sorted lyrics
 const useLyricsArray = (raw: Record<string,string>) =>
@@ -165,27 +167,54 @@ const MusicPlayer: React.FC = () => {
   };
 
   // Sync lyrics
+  // Sync lyrics
   useEffect(() => {
-    if (!isPlaying) return;
-    const iv = setInterval(() => {
-      const idx = lyricsArray.reduce((p, line, i) => line.time <= progress ? i : p, 0);
-      setCurrentLine(idx);
-      lyricRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 200);
-    return () => clearInterval(iv);
-  }, [progress, isPlaying, lyricsArray]);
+    if (!isPlaying || lyricsArray.length === 0) return;
+
+    const intervalId = setInterval(() => {
+      const currentPlaybackTime = progress;
+      let activeIndex = -1;
+
+      for (let i = 0; i < lyricsArray.length; i++) {
+        if (lyricsArray[i].time <= currentPlaybackTime) {
+          activeIndex = i;
+        } else {
+          break; // Since lyricsArray is sorted, we can break early
+        }
+      }
+
+      if (activeIndex !== currentLine) {
+        console.log('Current line index:', activeIndex, 'Time:', lyricsArray[activeIndex]?.time, 'Text:', lyricsArray[activeIndex]?.text);
+        setCurrentLine(activeIndex);
+        if (lyricRefs.current[activeIndex]) {
+          lyricRefs.current[activeIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(intervalId);
+      console.log('Lyrics sync interval cleared.');
+    };
+  }, [progress, isPlaying, lyricsArray, currentLine]);
 
   const formatTime = (t: number) => isNaN(t) ? '0:00' : `${Math.floor(t/60)}:${('0'+Math.floor(t%60)).slice(-2)}`;
 
   return (
-    <div role="region" aria-label="Music player" style={{ background: `url(${songMetadata.coverArt}) center/cover`, height: '100vh', position: 'relative' }}>
-      <div style={{ backdropFilter: 'blur(10px)', backgroundColor: 'rgba(0,0,0,0.85)', width:'100%', height:'100%' }}>
-        <Container className="h-100 d-flex flex-column justify-content-center align-items-center text-light">
-          <Card bg="dark" text="light" className="w-100 border-0" style={{ maxWidth:720 }}>
-            <Card.Body>
-              <Card.Img src={songMetadata.coverArt} className="rounded shadow mb-4 mx-auto" style={{ width:220, height:220, objectFit:'cover' }}/>
-              <Card.Title className="fw-bold">{songMetadata.title}</Card.Title>
-              <Card.Text className="text-muted mb-3">{songMetadata.artist} — {songMetadata.album}</Card.Text>
+    <Container fluid className="p-0 player-container" style={{ '--cover-art': `url(${songMetadata.coverArt})` }}>
+      <Container className="inner-container h-100 d-flex flex-column justify-content-center align-items-center text-light gap-3 p-4">
+        <Card className="player-card w-100 border-0" style={{ maxWidth: '720px' }}>
+          <Card.Body>
+            <Row>
+              <Col>
+                <Card.Img src={songMetadata.coverArt} className="rounded shadow mb-4 mx-auto" style={{ width:220, height:220, objectFit:'cover' }}/>
+                <Card.Title className="fw-bold">{songMetadata.title}</Card.Title>
+                <Card.Text className="text-secondary mb-3">{songMetadata.artist} — {songMetadata.album}</Card.Text>
+              </Col>
+              <Col>
+                <LyricsList lyricsArray={lyricsArray} currentLine={currentLine}/>
+              </Col>
+            </Row>
 
               {/* Clickable ProgressBar */}
               <div onClick={handleSeek} style={{ width:'100%', cursor:'pointer' }}>
@@ -217,41 +246,18 @@ const MusicPlayer: React.FC = () => {
               </div>
 
               {/* Volume slider */}
-              <Form.Group as={Row} className="align-items-center justify-content-center mb-4" style={{ maxWidth:200 }}>
+              <Form.Group as={Row} className="align-items-center justify-content-center mb-4" >
                 <Col xs="auto"><FaVolumeUp/></Col>
-                <Col><Form.Range value={volume} min={0} max={1} step={0.01} onChange={changeVolume}/></Col>
+                <Col className='mt-2'><Form.Range className='w-25' style={{height:"none"}} value={volume} min={0} max={1} step={0.01} onChange={changeVolume}/></Col>
+                <Col xs="auto" >
+                  <OverlayTrigger overlay={<Tooltip>Show Play Queue</Tooltip>}>
+                    <Button variant="outline-info" className="position-relative mb-3 btn-rounded-circle" onClick={toggleQueue}>
+                      <FaListUl className="me-1"/>
+                      {queue.length>0 && <Badge bg="danger" pill>{queue.length}</Badge>}
+                    </Button>
+                  </OverlayTrigger>
+                </Col>
               </Form.Group>
-
-              {/* Enhanced Lyrics Area */}
-              <Accordion defaultActiveKey="0" className="w-100 mb-4" style={{ maxWidth:500 }}>
-                <Accordion.Item eventKey="0" className="bg-secondary bg-opacity-25 text-light">
-                  <Accordion.Header><FaMusic className="me-2"/> Lyrics</Accordion.Header>
-                  <Accordion.Body style={{ maxHeight:200, overflowY:'auto' }}>
-                    <ListGroup variant="flush">
-                      {lyricsArray.map((line, i) => (
-                        <ListGroup.Item
-                          key={i}
-                          ref={el=>lyricRefs.current[i]=el}
-                          active={i===currentLine}
-                          className={i===currentLine? 'fw-bold':'text-light'}
-                          style={{ transition:'background-color 0.3s', backgroundColor: i===currentLine ? 'rgba(0,123,255,0.2)' : 'transparent', border:'none', padding:'4px 0' }}
-                        >
-                          <small className="text-muted me-2">{formatTime(line.time)}</small>
-                          {line.text}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
-
-              {/* Queue Toggle */}
-              <OverlayTrigger overlay={<Tooltip>Show Play Queue</Tooltip>}>
-                <Button variant="outline-info" className="position-relative mb-3 btn-rounded-circle" onClick={toggleQueue}>
-                  <FaListUl className="me-1"/> Queue
-                  {queue.length>0 && <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">{queue.length}</Badge>}
-                </Button>
-              </OverlayTrigger>
             </Card.Body>
           </Card>
 
@@ -273,8 +279,7 @@ const MusicPlayer: React.FC = () => {
             </Offcanvas.Body>
           </Offcanvas>
         </Container>
-      </div>
-    </div>
+      </Container>
   );
 };
 

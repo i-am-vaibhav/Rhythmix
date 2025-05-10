@@ -9,7 +9,8 @@ export default defineConfig({
       name: "library_web",
       filename: "remoteEntry.js",
       exposes: {
-        './App': './src/App',
+        './MusicPlayer': './src/components/MusicPlayer.tsx',
+        './FooterMusicPlayer': './src/components/FooterMusicPlayer.tsx',
       },
       remotes: {
         container: 'http://localhost:5173/assets/remoteEntry.js',
