@@ -201,7 +201,7 @@ const MusicPlayer: React.FC = () => {
   const formatTime = (t: number) => isNaN(t) ? '0:00' : `${Math.floor(t/60)}:${('0'+Math.floor(t%60)).slice(-2)}`;
 
   return (
-    <Container fluid className="p-0 player-container" style={{ '--cover-art': `url(${songMetadata.coverArt})` }}>
+    <Container fluid className="p-0 player-container" style={{ '--cover-art': `url(${songMetadata.coverArt})` } as React.CSSProperties}>
       <Container className="inner-container h-100 d-flex flex-column justify-content-center align-items-center text-light gap-3 p-4">
         <Card className="player-card w-100 border-0" style={{ maxWidth: '720px' }}>
           <Card.Body>
