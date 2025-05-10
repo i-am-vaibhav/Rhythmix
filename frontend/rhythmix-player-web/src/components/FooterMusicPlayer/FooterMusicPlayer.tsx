@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, ProgressBar, Form, Row, Col } from 'react-bootstrap';
-import { FaPlay, FaPause, FaStop } from 'react-icons/fa';
-import { FaShuffle } from 'react-icons/fa6';
+import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaPlay, FaPause, FaListUl } from 'react-icons/fa';
+import { FaRepeat, FaShuffle } from 'react-icons/fa6';
 import { Howl } from 'howler';
-import { mockAudioUrl, mockSongMetadata, type SongMetadata } from '../../music/model';
+import { mockSongMetadata, type SongMetadata } from '../../music/model';
 import styles from './FooterMusicPlayer.module.css'; // Import the CSS Module
+import PlayQueue from '../PlayQueue';
 
 const FooterMusicPlayer: React.FC = () => {
   const soundRef = useRef<Howl | null>(null);
@@ -15,15 +16,63 @@ const FooterMusicPlayer: React.FC = () => {
   const [volume, setVolume] = useState(1);
   const [shuffle, setShuffle] = useState(false);
   const [queue, setQueue] = useState<SongMetadata[]>([mockSongMetadata]);
+  const [repeat, setRepeat] = useState(false);
+
+  const [showQueue, setShowQueue] = useState(false);
+  const toggleQueue = () => setShowQueue(prev => !prev);
+
+
+  const removeAt = (i: number) => setQueue(q => [...q.slice(0, i), ...q.slice(i + 1)]);
+
+  const dequeue = () => {
+    let next;
+    setQueue(q => {
+      next = q[0];
+      return q.slice(1);
+    });
+    return next;
+  };
+
+
+  const createSound = (song: SongMetadata) => {
+      const sound = new Howl({
+        src: [song.url],
+        html5: true,
+        volume,
+        onplay: () => {
+          setIsPlaying(true);
+          setDuration(sound.duration());
+          updateProgress();
+        },
+        onpause: () => setIsPlaying(false),
+        onstop: () => setIsPlaying(false),
+        onend: () => {
+          if (repeat) {
+            sound.play();
+          } else {
+            const nextSong = dequeue();
+            if (nextSong) {
+              setSongMetadata(nextSong);
+            } else {
+              setIsPlaying(false);
+            }
+          }
+        },
+      });
+      return sound;
+  }
+
   const togglePlay = () => {
     const s = soundRef.current;
     if (!s) return;
     s.playing() ? s.pause() : s.play();
   };
 
-  const stop = () => {
-    soundRef.current?.stop();
-    setProgress(0);
+  const playTrack = (song: SongMetadata) => {
+      soundRef.current?.stop();
+      const sound = createSound(song);
+      soundRef.current = sound;
+      sound.play();
   };
 
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,29 +105,14 @@ const FooterMusicPlayer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const sound = new Howl({
-      src: [mockAudioUrl.mockSong],
-      html5: true,
-      volume,
-      onplay: () => {
-        setIsPlaying(true);
-        setDuration(sound.duration());
-        updateProgress();
-      },
-      onpause: () => setIsPlaying(false),
-      onstop: () => setIsPlaying(false),
-      onend: () => {
-        setIsPlaying(false);
-        const next = queue[0];
-        setQueue(q => q.slice(1));
-        if (next) setSongMetadata(next);
-      }
-    });
+    const sound = createSound(songMetadata);
     soundRef.current = sound;
+    sound.play();
     return () => {
+      sound.stop();
       sound.unload();
-    };
-  }, [songMetadata]);
+    }
+  }, []);
 
   const updateProgress = () => {
     const interval = setInterval(() => {
@@ -118,18 +152,32 @@ const FooterMusicPlayer: React.FC = () => {
             <Button variant={shuffle ? 'primary' : 'outline-light'} onClick={() => setShuffle(!shuffle)} className={styles['btn-rounded-circle']}>
               <FaShuffle />
             </Button>
+            <Button variant={repeat ? 'primary' : 'outline-light'} onClick={() => setRepeat(!repeat)} className={styles['btn-rounded-circle']}>
+              <FaRepeat />
+            </Button>
             <Button onClick={togglePlay} className={styles['btn-rounded-circle']}>
               {isPlaying ? <FaPause /> : <FaPlay />}
             </Button>
-            <Button onClick={stop} className={styles['btn-rounded-circle']}>
-              <FaStop />
-            </Button>
+            <OverlayTrigger overlay={<Tooltip>Show Play Queue</Tooltip>}>
+              <Button variant="outline-info" className={styles['btn-rounded-circle']} onClick={toggleQueue}>
+                <FaListUl/>
+              </Button>
+            </OverlayTrigger>
           </Col>
           <Col md={2} className="d-flex align-items-center justify-content-end">
             <Form.Range value={volume * 100} onChange={changeVolume} className={styles['form-range-dark']} />
           </Col>
         </Row>
       </div>
+      <PlayQueue 
+        queue={queue}
+        show={showQueue}
+        onHide={toggleQueue}
+        onClear={() => setQueue([])}
+        playTrack={playTrack}
+        loading={false}
+        removeAt={removeAt} 
+      />
     </footer>
   );
 };

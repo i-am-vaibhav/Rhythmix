@@ -1,6 +1,7 @@
 import mockSong from "../assets/mock-song/Suniyan Suniyan - Juss 128 Kbps.mp3";
 
 export interface SongMetadata {
+  id?: string;
   title: string;
   artist: string;
   album: string;
