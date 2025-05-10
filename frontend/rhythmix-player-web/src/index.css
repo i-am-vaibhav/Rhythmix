@@ -272,5 +272,6 @@
   border-radius: 50%;
 }
 
-
-
+input[type="range"] {
+  transition: all 0.2s ease-in-out;
+}
