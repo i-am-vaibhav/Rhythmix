@@ -29,6 +29,7 @@ const LyricsList: React.FC<LyricsListProps> = ({ lyricsArray, currentLine }) => 
         lyricsArray.map((line, i) => (
           <ListGroup.Item
             key={i}
+            as="li"
             ref={i === currentLine ? activeRef : null}
             active={i === currentLine}
             className={`lyrics-item ${i === currentLine ? 'active' : ''}`}
