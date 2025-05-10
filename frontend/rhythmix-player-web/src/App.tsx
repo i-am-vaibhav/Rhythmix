@@ -8,7 +8,7 @@ function App() {
   return (
     <>
     <Routes>
-      <Route path="/footer" element={<FooterMusicPlayer/>} />
+      <Route path="/footer" element={<FooterMusicPlayer musicPlayerNavigationUrl='/music'/>} />
       <Route path="/music" element={<MusicPlayer/>} />
     </Routes>
     </>

@@ -7,6 +7,7 @@ export interface SongMetadata {
   album: string;
   coverArt: string;
   url: string;
+  lyricsUrl?: string;
 }
 
 export interface Lyrics {
