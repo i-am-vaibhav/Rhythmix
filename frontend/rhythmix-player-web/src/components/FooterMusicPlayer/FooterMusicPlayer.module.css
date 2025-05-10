@@ -1,0 +1,169 @@
+.footer-player {
+  background-color: #121212;  /* Dark background */
+  color: #fff;  /* White text color */
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.8);
+  width: 100%;
+}
+
+/* Inner container */
+.footer-inner-container {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Row and columns */
+.footer-player .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Adjusting image size and layout */
+.footer-player .card-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Title and artist styling */
+.footer-player .card-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.footer-player .card-text {
+  font-size: 12px;
+  color: #aaa;  /* Lighter text color for artist */
+}
+
+/* Progress bar and time display */
+.footer-player .progress-bar-dark {
+  height: 6px;
+  border-radius: 5px;
+  background-color: #444;
+  transition: width 0.3s ease-in-out;
+}
+
+.footer-player .time-display {
+  font-size: 12px;
+  color: #aaa;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+/* Play button container */
+.footer-player .btn-rounded-circle {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+  background-color: #333;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Hover and active states for buttons */
+.footer-player .btn-rounded-circle:hover {
+  background-color: #555;
+  cursor: pointer;
+}
+
+.footer-player .btn-rounded-circle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3498db;
+}
+
+/* Volume control */
+.footer-player .form-range-dark {
+  width: 100%;
+  background-color: #333;
+  height: 8px;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.footer-player .form-range-dark::-webkit-slider-thumb {
+  background-color: #3498db;
+  border: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.footer-player .form-range-dark::-webkit-slider-thumb:hover {
+  background-color: #2980b9;
+}
+
+/* Queue button with badge */
+.footer-player .position-relative {
+  position: relative;
+}
+
+.footer-player .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #e74c3c;
+  padding: 4px 8px;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+/* Offcanvas styling */
+.footer-player .offcanvas-header {
+  background-color: #121212;
+  border-bottom: 1px solid #333;
+  color: #fff;
+}
+
+.footer-player .offcanvas-title {
+  font-size: 18px;
+}
+
+.footer-player .offcanvas-body {
+  background-color: #1f1f1f;
+}
+
+.footer-player .list-group-item {
+  background-color: #1f1f1f;
+  color: #ccc;
+  border: none;
+  padding: 12px;
+}
+
+.footer-player .list-group-item:hover {
+  background-color: #333;
+}
+
+.footer-player .list-group-item button {
+  background: transparent;
+  color: #e74c3c;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.footer-player .list-group-item button:hover {
+  color: #c0392b;
+}
+
+/* Empty queue message */
+.footer-player .text-muted {
+  font-size: 14px;
+  color: #777;
+}

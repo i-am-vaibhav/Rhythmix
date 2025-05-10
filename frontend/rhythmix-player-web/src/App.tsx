@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import MusicPlayer from './components/MusicPlayer'
-import FooterMusicPlayer from './components/FooterMusicPlayer'
+import MusicPlayer from './components/MusicPlayer.tsx'
+import FooterMusicPlayer from './components/FooterMusicPlayer/FooterMusicPlayer.tsx'
 
 function App() {
 
