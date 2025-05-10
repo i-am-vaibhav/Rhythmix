@@ -1,13 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FaPlay, FaPause, FaListUl } from 'react-icons/fa';
-import { FaRepeat, FaShuffle } from 'react-icons/fa6';
+import { FaMaximize, FaRepeat, FaShuffle } from 'react-icons/fa6';
 import { Howl } from 'howler';
 import { mockSongMetadata, type SongMetadata } from '../../music/model';
 import styles from './FooterMusicPlayer.module.css'; // Import the CSS Module
 import PlayQueue from '../PlayQueue';
+import { useNavigate } from 'react-router-dom';
 
-const FooterMusicPlayer: React.FC = () => {
+
+interface FooterMusicPlayerProps {
+  musicPlayerNavigationUrl: string;
+}
+
+const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({musicPlayerNavigationUrl}) => {
   const soundRef = useRef<Howl | null>(null);
   const [songMetadata, setSongMetadata] = useState<SongMetadata>(mockSongMetadata);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,7 +26,7 @@ const FooterMusicPlayer: React.FC = () => {
 
   const [showQueue, setShowQueue] = useState(false);
   const toggleQueue = () => setShowQueue(prev => !prev);
-
+  const navigate = useNavigate();
 
   const removeAt = (i: number) => setQueue(q => [...q.slice(0, i), ...q.slice(i + 1)]);
 
@@ -166,6 +172,13 @@ const FooterMusicPlayer: React.FC = () => {
           </Col>
           <Col md={2} className="d-flex align-items-center justify-content-end">
             <Form.Range value={volume * 100} onChange={changeVolume} className={styles['form-range-dark']} />
+          </Col>
+
+          <Col md={1} className="d-flex align-items-center justify-content-end">
+            <Button onClick={() => navigate(
+          musicPlayerNavigationUrl)} className={styles['btn-rounded-circle']} >
+              <FaMaximize/>
+            </Button>
           </Col>
         </Row>
       </div>
