@@ -28,6 +28,8 @@ const Dashboard = () => {
 
   const clearQueue = useMusicPlayerStore((state:UseMusicPlayerStore) => state.clearQueue);
 
+  const stop = useMusicPlayerStore((state:UseMusicPlayerStore) => state.stop);
+
   // Find currently selected playlist
   const currentPlaylist = mockPlaylists.find(pl => pl.id === selectedPlaylist) || mockPlaylists[0];
 
@@ -39,7 +41,6 @@ const Dashboard = () => {
   );
 
   const playCurrentPlayList = () => {
-    clearQueue();
     currentPlaylist.tracks.forEach((track) => {
       addSongToQueue(track);
     });
@@ -102,7 +103,9 @@ const Dashboard = () => {
             variant="light"
             className="shadow-lg mb-4"
             onClick={() => {
-              playCurrentPlayList()
+              clearQueue();
+              stop();
+              playCurrentPlayList();   
             }}
           >
             <FaPlay/> Play All

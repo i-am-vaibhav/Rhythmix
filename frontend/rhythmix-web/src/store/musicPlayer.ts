@@ -47,6 +47,7 @@ interface MusicPlayerActions {
   getCurrentSong: () => SongMetadata | null;
   playTrackAt: (index: number) => void;
   playTrackSong: (song:SongMetadata) => void;
+  stop: () => void;
 }
 
 export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>((set, get) => {
@@ -213,6 +214,15 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
       } else {
         set(state => ({ queue: [...state.queue, song] }));
         playTrackInternal(queue.length);
+      }
+    },
+
+    stop: () => {
+      const { player } = get();
+      if (player) {
+        player.stop();
+        set({ isPlaying: false, currentTrackIndex: -1, player: null });
+        console.log('Playback stopped.');
       }
     }
   };

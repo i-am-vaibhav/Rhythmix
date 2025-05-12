@@ -29,11 +29,9 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const toggleRepeat = useMusicPlayerStore((state:UseMusicPlayerStore) => state.toggleRepeat);
   const getSeek = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getSeek);
   const getCurrentSongDuration = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getCurrentSongDuration);
-
   const playPreviousTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playPreviousTrack);
   const playNextTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playNextTrack);
   const currentTrackIndex = useMusicPlayerStore((state:UseMusicPlayerStore) => state.currentTrackIndex);
-
 
   const songMetadata: SongMetadata = getCurrentSong() || { 
     coverArt: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1BhBgvAdx2cQwiyvb-89VbGVzgQbB983tfw&s', 
@@ -44,7 +42,6 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
     lyrics: null,
     id: ''
   };
-  const [playing, setIsPlaying] = useState(isPlaying);
   const [progress, setProgress] = useState(0);
   const duration = getCurrentSongDuration();
   const [showQueue, setShowQueue] = useState(false);
@@ -68,14 +65,21 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
 
   // Progress Updater
   useEffect(() => {
-    if (!playing) return;
-
-    const iv = setInterval(() => {
+    let iv: ReturnType<typeof setInterval>;;
+    if (isPlaying) {
+      // 1) kick it off immediately
       setProgress(getSeek());
-    }, 200);
 
-    return () => clearInterval(iv);
-  }, [playing, getSeek]);
+      // 2) then poll more frequently
+      iv = setInterval(() => {
+        setProgress(getSeek());
+      }, 100);    // ↓ shorter interval for smoother updates
+    }
+
+    return () => {
+      if (iv) clearInterval(iv);
+    };
+  }, [isPlaying]);
 
   // Format seconds to m:ss
   const formatTime = (t: number) =>
@@ -131,11 +135,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             <Button disabled={queue.length==0 || currentTrackIndex == 0}  onClick={() => playPreviousTrack()} className={styles['btn-rounded-circle']}>
               <FaBackward/>
             </Button>
-            <Button disabled={queue.length==0} onClick={() =>{
-                  togglePlayPause();
-                  setIsPlaying(!isPlaying);
-                }
-              } className={styles['btn-rounded-circle']}>
+            <Button disabled={queue.length==0} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
               {isPlaying ? <FaPause /> : <FaPlay />}
             </Button>
             <Button disabled={queue.length == currentTrackIndex+1}  onClick={() => playNextTrack()} className={styles['btn-rounded-circle']}>
@@ -158,7 +158,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             />
           </Col>
           <Col md={1} className="d-flex align-items-center justify-content-end">
-            <OverlayTrigger overlay={<Tooltip>Show Play Queue</ Tooltip>}>
+            <OverlayTrigger overlay={<Tooltip>Show Play Queue</Tooltip>}>
                 <Button variant="outline-info" className={styles['btn-rounded-circle']} onClick={toggleQueue}>
                 <FaListUl />
               </Button>
