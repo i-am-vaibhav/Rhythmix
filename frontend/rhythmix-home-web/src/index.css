@@ -49,3 +49,52 @@ input::placeholder,
 textarea::placeholder {
   color: #888 !important;
 }
+
+.music-card .overlay {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.music-card:hover .overlay {
+  opacity: 1;
+}
+
+.music-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.music-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+}
+
+.play-now-btn {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.play-now-btn:hover {
+  transform: scale(1.03);
+}
+
+.flex-nowrap::-webkit-scrollbar {
+  display: none;
+}
+.flex-nowrap {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.image-container {
+  width: 100%;           /* fill the card’s width */
+  height: 350px;         /* fixed height */
+  overflow: hidden;      /* crop any overflow */
+  position: relative;    /* for overlay */
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* maintains aspect, crops excess */
+}
+

@@ -55,8 +55,12 @@ interface SectionProps {
 
 const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
   const navigate = useNavigate();
-  const addSongToQueue = useMusicPlayerStore((state: UseMusicPlayerStore) => state.addSongToQueue);
-  const playTrackSong = useMusicPlayerStore((state: UseMusicPlayerStore) => state.playTrackSong);
+  const addSongToQueue = useMusicPlayerStore(
+    (state: UseMusicPlayerStore) => state.addSongToQueue
+  );
+  const playTrackSong = useMusicPlayerStore(
+    (state: UseMusicPlayerStore) => state.playTrackSong
+  );
 
   return (
     <section className="mb-5">
@@ -72,49 +76,44 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
       >
         {items.map((item) => (
           <Col key={item.id} className="d-flex">
-            <Card className="h-100 shadow-sm border-0 hover-shadow transition">
-              <div className="position-relative">
+            <Card className="music-card h-100 border-0 shadow-sm">
+              <div className="position-relative image-container">
                 <Card.Img
                   src={item.coverArt}
                   alt={item.title}
                   className="rounded-top"
-                  style={{ height: '180px', objectFit: 'cover' }}
+                  style={{objectFit:'cover'}}
                 />
-
-                <div className="position-absolute top-50 start-50 translate-middle d-flex gap-2">
-                  <Button
-                    variant="light"
-                    className="rounded-circle p-2 shadow"
-                    onClick={() => {
-                      navigate('/player/music');
-                      playTrackSong(item);
-                    }}
-                  >
-                    <FaPlay />
-                  </Button>
-                  <Button
-                    variant="light"
-                    className="rounded-circle p-2 shadow"
-                    onClick={() => addSongToQueue(item)}
-                  >
-                    <FaPlus />
-                  </Button>
+                <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
+                  <div className="mb-2 d-flex gap-2">
+                    <Button
+                      variant="light"
+                      className="rounded-circle p-2 shadow-lg"
+                      onClick={() => {
+                        navigate('/player/music');
+                        playTrackSong(item);
+                      }}
+                    >
+                      <FaPlay />
+                    </Button>
+                    <Button
+                      variant="light"
+                      className="rounded-circle p-2 shadow-lg"
+                      onClick={() => addSongToQueue(item)}
+                    >
+                      <FaPlus />
+                    </Button>
+                  </div>
+                  <div className="text-center d-flex flex-column justify-content-between">
+                    <div className="text-light mb-1 fs-6 text-truncate">
+                      {item.title}
+                    </div>
+                    <div className="text-light small text-truncate">
+                      {item.artist}
+                    </div>
                 </div>
+                </Card.ImgOverlay>
               </div>
-
-              <Card.Body className="text-center d-flex flex-column justify-content-between">
-                <div>
-                  <Card.Title className="mb-1 fs-6 text-truncate">
-                    {item.title}
-                  </Card.Title>
-                  <Card.Text className="text-muted small text-truncate">
-                    {item.artist}
-                  </Card.Text>
-                </div>
-                <Button variant="primary" size="sm" className="mt-2">
-                  Play Now
-                </Button>
-              </Card.Body>
             </Card>
           </Col>
         ))}
