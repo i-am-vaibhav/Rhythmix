@@ -35,6 +35,7 @@ declare module 'container/musicPlayer' {
     getCurrentSong: () => SongMetadata | null;
     playTrackAt: (index: number) => void;
     playTrackSong: (song:SongMetadata) => void;
+    stop: () => void;
   }
 
   export type UseMusicPlayerStore = UseBoundStore<MusicPlayerState & MusicPlayerActions>;
