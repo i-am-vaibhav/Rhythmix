@@ -18,6 +18,7 @@ const PlayQueue: React.FC<{ show: boolean; onHide: () => void }> = ({ show, onHi
   const clearQueue = useMusicPlayerStore((state:UseMusicPlayerStore) => state.clearQueue);
   const playPreviousTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playPreviousTrack);
   const playNextTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playNextTrack);
+  const togglePlayPause = useMusicPlayerStore((state:UseMusicPlayerStore) => state.togglePlayPause);
 
   const history = useMemo(() => queue.slice(0, currentTrackIndex), [queue, currentTrackIndex]);
   const current = queue[currentTrackIndex];
@@ -109,6 +110,7 @@ const PlayQueue: React.FC<{ show: boolean; onHide: () => void }> = ({ show, onHi
         {queue.length > 0 && (
           <Button variant="danger" size="sm" className="w-100" onClick={()=>{
             clearQueue();
+            togglePlayPause();
             navigate("/home/dashboard");
           }}>
             Clear Queue
