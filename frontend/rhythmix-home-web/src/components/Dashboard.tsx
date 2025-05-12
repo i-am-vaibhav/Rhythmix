@@ -85,10 +85,10 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
                   style={{objectFit:'cover'}}
                 />
                 <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
-                  <div className="mb-2 d-flex gap-2">
+                  <div className="m-2 d-flex opacity-75">
                     <Button
                       variant="light"
-                      className="rounded-circle p-2 shadow-lg"
+                      className="rounded-circle p-3 m-4 shadow-lg"
                       onClick={() => {
                         navigate('/player/music');
                         playTrackSong(item);
@@ -98,7 +98,7 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
                     </Button>
                     <Button
                       variant="light"
-                      className="rounded-circle p-2 shadow-lg"
+                      className="rounded-circle p-3 m-4 shadow-lg"
                       onClick={() => addSongToQueue(item)}
                     >
                       <FaPlus />
