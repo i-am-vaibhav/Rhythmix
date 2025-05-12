@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://pagalfree.com',  // The backend API server
+        target: 'https://pagalfree.com', 
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

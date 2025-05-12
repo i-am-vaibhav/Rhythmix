@@ -1,24 +1,27 @@
 import { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, InputGroup, ToggleButtonGroup, ToggleButton, Navbar, ButtonGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, InputGroup, ToggleButtonGroup, ToggleButton, ButtonGroup, Spinner, ListGroup } from 'react-bootstrap';
 import { FaSearch, FaPlay } from 'react-icons/fa';
+import FooterMusicPlayer from './FooterMusicPlayer';
+import trackList from "container/MockedMusic";
+import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
+import { MdLibraryMusic } from 'react-icons/md';
 
-const mockTracks = [
-  { id: 1, title: 'Dream in Lo-fi', artist: 'Various Artists', cover: '/covers/lofi.jpg' },
-  { id: 2, title: 'Chill Beats', artist: 'DJ Relax', cover: '/covers/chill.jpg' },
-  { id: 3, title: 'Jazz Vibes', artist: 'Smooth Jazz Band', cover: '/covers/jazz.jpg' },
-  { id: 4, title: 'Electro House', artist: 'Beat Master', cover: '/covers/electro.jpg' },
+const mockTracks = [ 
+  ...trackList
 ];
 
 const mockPlaylists = [
   { id: 'liked', name: 'Liked Songs', tracks: mockTracks },
   { id: 'playlist1', name: 'Chill Vibes', tracks: [mockTracks[1], mockTracks[2]] },
-  { id: 'playlist2', name: 'Party Mix', tracks: [mockTracks[0], mockTracks[3]] },
+  { id: 'playlist2', name: 'Party Mix', tracks: [mockTracks[0], mockTracks[1]] },
 ];
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [selectedPlaylist, setSelectedPlaylist] = useState('liked');
+
+  const playTrackSong = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playTrackSong);
 
   // Find currently selected playlist
   const currentPlaylist = mockPlaylists.find(pl => pl.id === selectedPlaylist) || mockPlaylists[0];
@@ -31,121 +34,156 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="bg-dark text-light" style={{ minHeight: '100vh' }}>
-      {/* Navbar */}
-      <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
-          <Navbar.Brand className="text-light">My Music Library</Navbar.Brand>
-        </Container>
-      </Navbar>
+    <Container fluid className="p-4">
+      <div className="d-flex flex-column min-vh-100">
+        <h3 className='text-light pt-3'><MdLibraryMusic/> Library</h3>
+        {/* Main Content */}
+        <Container fluid className="flex-grow-1 py-4">
+          {/* Playlists Selector */}
+          <div className="d-flex mb-4">
+            <ButtonGroup>
+              {mockPlaylists.map((pl) => (
+                <Button
+                  key={pl.id}
+                  variant={pl.id === selectedPlaylist ? 'primary' : 'outline-light'}
+                  onClick={() => setSelectedPlaylist(pl.id)}
+                >
+                  {pl.name}
+                </Button>
+              ))}
+            </ButtonGroup>
+          </div>
 
-      <Container className="py-4">
-        {/* Playlists Selector */}
-        <ButtonGroup className="mb-4">
-          {mockPlaylists.map(pl => (
-            <Button
-              key={pl.id}
-              variant={pl.id === selectedPlaylist ? 'primary' : 'outline-light'}
-              onClick={() => setSelectedPlaylist(pl.id)}
-            >
-              {pl.name}
-            </Button>
-          ))}
-        </ButtonGroup>
+          {/* Search & View Controls */}
+          <Row className="align-items-center mb-4">
+            <Col xs={12} md={8} className="mb-3 mb-md-0">
+              <InputGroup>
+                <InputGroup.Text className="border-0">
+                  <FaSearch />
+                </InputGroup.Text>
+                <Form.Control
+                  placeholder="Search tracks, artists..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border-0"
+                />
+              </InputGroup>
+            </Col>
+            <Col xs={12} md={4} className="text-md-end">
+              <ToggleButtonGroup
+                type="radio"
+                name="viewMode"
+                value={viewMode}
+                onChange={(val) => setViewMode(val)}
+              >
+                <ToggleButton id="grid-view" value="grid" variant="outline-light">
+                  Grid
+                </ToggleButton>
+                <ToggleButton id="list-view" value="list" variant="outline-light">
+                  List
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Col>
+          </Row>
 
-        {/* Search & View Controls */}
-        <Row className="align-items-center mb-4">
-          <Col md={8}>
-            <InputGroup>
-              <InputGroup.Text className="bg-secondary text-light border-0"><FaSearch /></InputGroup.Text>
-              <Form.Control
-                placeholder="Search tracks, artists..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="bg-secondary text-light border-0"
-              />
-            </InputGroup>
-          </Col>
-          <Col md={4} className="text-md-end mt-3 mt-md-0">
-            <ToggleButtonGroup
-              type="radio"
-              name="viewMode"
-              value={viewMode}
-              onChange={val => setViewMode(val)}
-            >
-              <ToggleButton id="grid-view" value="grid" variant="outline-light">
-                Grid View
-              </ToggleButton>
-              <ToggleButton id="list-view" value="list" variant="outline-light">
-                List View
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Col>
-        </Row>
+          {/* Tracks Display */}
+          {viewMode === 'grid' ? (
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+              {displayedTracks.length ? (
+                displayedTracks.map((track) => (
+                  <Col key={track.id}>
+                    <Card bg="dark" text="light" className="h-100 border-secondary hover-shadow">
+                      <div className="ratio ratio-1x1">
+                        <Card.Img
+                          src={track.coverArt}
+                          alt={track.title}
+                          className="object-fit-cover"
+                        />
+                      </div>
+                      <Card.Body>
+                        <Card.Title className="text-truncate mb-1">
+                          {track.title}
+                        </Card.Title>
+                        <Card.Text className="text-truncate">
+                          {track.artist}
+                        </Card.Text>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))
+              ) : (
+                <div className="w-100 text-center py-5">
+                  <Spinner animation="border" variant="light" />
+                </div>
+              )}
+            </Row>
+          ) : (
+            <ListGroup variant="flush" >
+              {displayedTracks.map((track) => (
+                <ListGroup.Item
+                  key={track.id}
+                  className="bg-dark text-light d-flex justify-content-between align-items-center py-3 border-secondary rounded-2 mb-2"
+                >
+                  <div className="d-flex align-items-center">
+                    <img
+                      src={track.coverArt}
+                      alt={track.title}
+                      className="rounded me-3"
+                      style={{ width: 60, height: 60, objectFit: 'cover' }}
+                    />
+                    <div>
+                      <div className="fw-semibold text-truncate" style={{ maxWidth: 200 }}>
+                        {track.title}
+                      </div>
+                      <div className="text-muted text-truncate" style={{ maxWidth: 200 }}>
+                        {track.artist}
+                      </div>
+                    </div>
+                  </div>
+                  <Button variant="outline-light" onClick={() => playTrackSong(track)}>
+                    <FaPlay />
+                  </Button>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          )}
 
-        {/* Tracks Display for Selected Playlist */}
-        {viewMode === 'grid' ? (
-          <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-            {displayedTracks.map(track => (
-              <Col key={track.id}>
-                <Card bg="secondary" text="light" className="h-100">
-                  <Card.Img variant="top" src={track.cover} style={{ height: '180px', objectFit: 'cover' }} />
-                  <Card.Body>
-                    <Card.Title className="text-truncate">{track.title}</Card.Title>
-                    <Card.Text className="text-truncate">{track.artist}</Card.Text>
-                  </Card.Body>
+          {/* Recently Played */}
+          <h2 className="mt-5 mb-3 text-light border-secondary border-bottom pb-2">
+            Recently Played
+          </h2>
+          <Row xs={2} sm={3} md={4} lg={4} className="g-3">
+            {mockTracks.slice(0, 4).map((track) => (
+              <Col key={track.id} className="d-flex">
+                <Card bg="dark" text="light" className="flex-fill border-secondary hover-shadow">
+                  <Row className="g-0">
+                    <Col xs={4} className="ratio ratio-1x1">
+                      <Card.Img
+                        src={track.coverArt}
+                        alt={track.title}
+                        className="object-fit-cover"
+                      />
+                    </Col>
+                    <Col xs={8} className="d-flex flex-column justify-content-center ps-3">
+                      <Card.Title className="mb-1 text-truncate" style={{ fontSize: '1rem' }}>
+                        {track.title}
+                      </Card.Title>
+                      <Card.Text className="mb-0 text-truncate" style={{ fontSize: '0.875rem' }}>
+                        {track.artist}
+                      </Card.Text>
+                    </Col>
+                  </Row>
                 </Card>
               </Col>
             ))}
           </Row>
-        ) : (
-          <div className="list-group">
-            {displayedTracks.map(track => (
-              <div
-                key={track.id}
-                className="list-group-item list-group-item-dark d-flex justify-content-between align-items-center"
-              >
-                <div className="d-flex align-items-center">
-                  <img
-                    src={track.cover}
-                    alt={track.title}
-                    className="rounded me-3"
-                    style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                  />
-                  <div>
-                    <div className="fw-semibold text-truncate" style={{ maxWidth: '200px' }}>{track.title}</div>
-                    <div className="text-muted text-truncate" style={{ maxWidth: '200px' }}>{track.artist}</div>
-                  </div>
-                </div>
-                <Button variant="light">
-                  <FaPlay />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        </Container>
 
-        {/* Recently Played */}
-        <h2 className="mt-5 mb-3 text-light">Recently Played</h2>
-        <Row xs={2} sm={3} md={4} className="g-3">
-          {mockTracks.slice(0, 4).map(track => (
-            <Col key={track.id} className="d-flex">
-              <Card bg="secondary" text="light" className="flex-fill d-flex">
-                <Row className="g-0">
-                  <Col xs={4}>
-                    <Card.Img src={track.cover} style={{ height: '100%', objectFit: 'cover' }} />
-                  </Col>
-                  <Col xs={8} className="d-flex flex-column justify-content-center ps-3">
-                    <Card.Title className="mb-0 text-truncate" style={{ fontSize: '1rem' }}>{track.title}</Card.Title>
-                    <Card.Text className="mb-0 text-truncate" style={{ fontSize: '0.875rem' }}>{track.artist}</Card.Text>
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Container>
-    </div>
+        <Container>
+          <FooterMusicPlayer musicPlayerNavigationUrl="/player/music" />
+        </Container>
+      </div>
+    </Container>
   );
 };
 
