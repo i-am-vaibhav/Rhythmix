@@ -5,7 +5,6 @@ import FooterMusicPlayer from './FooterMusicPlayer';
 import trackList from "container/MockedMusic";
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
 import { MdLibraryMusic } from 'react-icons/md';
-import { FaPlus } from 'react-icons/fa6';
 
 const mockTracks = [ 
   ...trackList
@@ -24,10 +23,6 @@ const Dashboard = () => {
 
   const playTrackSong = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playTrackSong);
 
-  const addSongToQueue = useMusicPlayerStore((state:UseMusicPlayerStore) => state.addSongToQueue);
-
-  const clearQueue = useMusicPlayerStore((state:UseMusicPlayerStore) => state.clearQueue);
-
   // Find currently selected playlist
   const currentPlaylist = mockPlaylists.find(pl => pl.id === selectedPlaylist) || mockPlaylists[0];
 
@@ -37,13 +32,6 @@ const Dashboard = () => {
       track.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       track.artist.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const playCurrentPlayList = () => {
-    clearQueue();
-    currentPlaylist.tracks.forEach((track) => {
-      addSongToQueue(track);
-    });
-  }
 
   return (
     <Container fluid className="p-4">
@@ -98,57 +86,28 @@ const Dashboard = () => {
             </Col>
           </Row>
 
-          <Button
-            variant="light"
-            className="shadow-lg mb-4"
-            onClick={() => {
-              playCurrentPlayList()
-            }}
-          >
-            <FaPlay/> Play All
-          </Button>
           {/* Tracks Display */}
           {viewMode === 'grid' ? (
             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
               {displayedTracks.length ? (
-                displayedTracks.map((item) => (
-                  <Col key={item.id} className="d-flex">
-                    <Card className="music-card h-100 border-0 shadow-sm">
-                      <div className="position-relative image-container">
+                displayedTracks.map((track) => (
+                  <Col key={track.id}>
+                    <Card bg="dark" text="light" className="h-100 border-secondary hover-shadow">
+                      <div className="ratio ratio-1x1">
                         <Card.Img
-                          src={item.coverArt}
-                          alt={item.title}
-                          className="rounded-top"
-                          style={{objectFit:'cover'}}
+                          src={track.coverArt}
+                          alt={track.title}
+                          className="object-fit-cover"
                         />
-                        <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
-                          <div className="m-2 d-flex opacity-75">
-                            <Button
-                              variant="light"
-                              className="rounded-circle p-3 m-4 shadow-lg"
-                              onClick={() => {
-                                playTrackSong(item);
-                              }}
-                            >
-                              <FaPlay />
-                            </Button>
-                            <Button
-                              variant="light"
-                              className="rounded-circle p-3 m-4 shadow-lg"
-                              onClick={() => addSongToQueue(item)}>
-                              <FaPlus />
-                            </Button>
-                          </div>
-                          <div className="text-center d-flex flex-column justify-content-between">
-                            <div className="text-light mb-1 fs-6 text-truncate">
-                              {item.title}
-                            </div>
-                            <div className="text-light small text-truncate">
-                              {item.artist}
-                            </div>
-                        </div>
-                        </Card.ImgOverlay>
                       </div>
+                      <Card.Body>
+                        <Card.Title className="text-truncate mb-1">
+                          {track.title}
+                        </Card.Title>
+                        <Card.Text className="text-truncate">
+                          {track.artist}
+                        </Card.Text>
+                      </Card.Body>
                     </Card>
                   </Col>
                 ))
@@ -181,19 +140,9 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className='ms-auto'>
-                    <Button variant="outline-light"
-                      className=" shadow-lg"
-                      onClick={() => playTrackSong(track)}>
-                      <FaPlay />
-                    </Button>
-                    <Button
-                      variant="outline-light"
-                      className=" shadow-lg"
-                      onClick={() => addSongToQueue(track)}>
-                      <FaPlus />
-                    </Button>
-                  </div>
+                  <Button variant="outline-light" onClick={() => playTrackSong(track)}>
+                    <FaPlay />
+                  </Button>
                 </ListGroup.Item>
               ))}
             </ListGroup>
@@ -204,44 +153,26 @@ const Dashboard = () => {
             Recently Played
           </h2>
           <Row xs={2} sm={3} md={4} lg={4} className="g-3">
-            {mockTracks.slice(0, 4).map((item) => (
-              <Col key={item.id} className="d-flex">
-                <Card className="music-card h-100 border-0 shadow-sm">
-                  <div className="position-relative image-container">
-                    <Card.Img
-                      src={item.coverArt}
-                      alt={item.title}
-                      className="rounded-top"
-                      style={{objectFit:'cover'}}
-                    />
-                    <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
-                      <div className="m-2 d-flex opacity-75">
-                        <Button
-                          variant="light"
-                          className="rounded-circle p-3 m-4 shadow-lg"
-                          onClick={() => {
-                            playTrackSong(item);
-                          }}
-                        >
-                          <FaPlay />
-                        </Button>
-                        <Button
-                          variant="light"
-                          className="rounded-circle p-3 m-4 shadow-lg"
-                          onClick={() => addSongToQueue(item)}>
-                          <FaPlus />
-                        </Button>
-                      </div>
-                      <div className="text-center d-flex flex-column justify-content-between">
-                        <div className="text-light mb-1 fs-6 text-truncate">
-                          {item.title}
-                        </div>
-                        <div className="text-light small text-truncate">
-                          {item.artist}
-                        </div>
-                    </div>
-                    </Card.ImgOverlay>
-                  </div>
+            {mockTracks.slice(0, 4).map((track) => (
+              <Col key={track.id} className="d-flex">
+                <Card bg="dark" text="light" className="flex-fill border-secondary hover-shadow">
+                  <Row className="g-0">
+                    <Col xs={4} className="ratio ratio-1x1">
+                      <Card.Img
+                        src={track.coverArt}
+                        alt={track.title}
+                        className="object-fit-cover"
+                      />
+                    </Col>
+                    <Col xs={8} className="d-flex flex-column justify-content-center ps-3">
+                      <Card.Title className="mb-1 text-truncate" style={{ fontSize: '1rem' }}>
+                        {track.title}
+                      </Card.Title>
+                      <Card.Text className="mb-0 text-truncate" style={{ fontSize: '0.875rem' }}>
+                        {track.artist}
+                      </Card.Text>
+                    </Col>
+                  </Row>
                 </Card>
               </Col>
             ))}
