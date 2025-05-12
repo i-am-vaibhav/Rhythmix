@@ -1,5 +1,8 @@
 import { Route, Routes } from "react-router-dom"
 import Dashboard from "./components/Dashboard.tsx"
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import './index.css'
 
 function App() {
 

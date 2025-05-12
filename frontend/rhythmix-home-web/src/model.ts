@@ -3,11 +3,6 @@ export interface LyricsLine {
   text: string;
 }
 
-export interface MusicQueueState {
-  queue: SongMetadata[];
-  handleQueueChange: (newQueue: SongMetadata[]) => void;
-}
-
 export interface SongMetadata {
   id?: string;
   title: string;

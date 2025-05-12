@@ -19,7 +19,9 @@ export default defineConfig({
         "react-icons",
         "react-dom",
         "zustand",
-        "react-router-dom"
+        "react-router-dom",
+        "react-bootstrap",
+        "bootstrap",  
       ], 
     }),
   ],

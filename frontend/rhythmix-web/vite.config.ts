@@ -15,23 +15,34 @@ export default defineConfig({
         },
         exposes: {
           "./AuthStore": "./src/store/authStore.ts",
+          "./MockedMusic": "./src/store/mockedMusic.ts",
+          "./musicPlayer": "./src/store/musicPlayer.ts",
         },
         shared: {
           "react": {
-            requiredVersion: "^19.1.0",
+            version: "^19.1.0",
           },
           "react-dom": {
-            requiredVersion: "^19.1.0",
+            version: "^19.1.0",
           },
           "react-router-dom": {
-            requiredVersion: "^7.5.3",
+            version: "^7.5.3",
           },
           "zustand": {
-            requiredVersion: "^5.0.4",
+            version: "^5.0.4",
           },
           "react-icons": {
-            requiredVersion: "^5.5.0",
-          }
+            version: "^5.5.0",
+          },
+          "react-bootstrap":{
+            version: "^2.10.9"
+          },
+          "bootstrap":{
+            version:"^5.3.6"
+          } ,
+          "howler":{
+            version:"^2.2.4"
+          },
         },      
       }),
     ],
