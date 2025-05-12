@@ -72,14 +72,21 @@ const MusicPlayer: React.FC = () => {
 
   // Progress Updater
   useEffect(() => {
-    if (!playing) return;
-
-    const iv = setInterval(() => {
+    let iv: ReturnType<typeof setInterval>;;
+    if (isPlaying) {
+      // 1) kick it off immediately
       setProgress(getSeek());
-    }, 200);
 
-    return () => clearInterval(iv);
-  }, [playing, getSeek]);
+      // 2) then poll more frequently
+      iv = setInterval(() => {
+        setProgress(getSeek());
+      }, 100);    // ↓ shorter interval for smoother updates
+    }
+
+    return () => {
+      if (iv) clearInterval(iv);
+    };
+  }, [isPlaying]);
 
   // Lyrics sync
   useEffect(() => {
