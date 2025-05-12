@@ -37,12 +37,6 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   // Toggle queue drawer
   const toggleQueue = () => setShowQueue(prev => !prev);
 
-  // Remove at index
-  const removeAt = (i: number) => {
-    const newQ = [...queue.slice(0, i), ...queue.slice(i + 1)];
-    setQueue(newQ);
-  };
-
   // Dequeue next
   const dequeue = (): SongMetadata | undefined => {
     const next = queue[1];
@@ -214,13 +208,8 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
       </div>
 
       <PlayQueue
-        queue={queue}
         show={showQueue}
         onHide={toggleQueue}
-        onClear={() => setQueue([])}
-        playTrack={playTrack}
-        loading={false}
-        removeAt={removeAt}
       />
     </footer>
   );

@@ -7,3 +7,9 @@ declare module 'library_web/App' {
   const App: React.FC;
   export default App;
 }
+
+declare module 'player_web/App' {
+  const App: React.FC;
+  export default App;
+}
+

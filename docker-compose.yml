@@ -6,9 +6,8 @@ services:
     build:
       context: ./frontend/rhythmix-home-web
       dockerfile: DockerFile
-      target: runner
     ports:
-      - "3002:3002"              
+      - "3002:80"              
     environment:
       - NODE_ENV=production
 
@@ -17,9 +16,18 @@ services:
     build:
       context: ./frontend/rhythmix-library-web
       dockerfile: DockerFile
-      target: runner
     ports:
-      - "3001:3001"              
+      - "3001:80"              
+    environment:
+      - NODE_ENV=production
+
+  rhythmix-player-web:
+    container_name: rhythmix-player-web
+    build:
+      context: ./frontend/rhythmix-player-web
+      dockerfile: DockerFile
+    ports:
+      - "3000:80"              
     environment:
       - NODE_ENV=production
 
@@ -31,8 +39,7 @@ services:
     build:
       context: ./frontend/rhythmix-web
       dockerfile: DockerFile
-      target: runner
     ports:
-      - "5173:5173"              
+      - "5173:80"              
     environment:
       - NODE_ENV=production

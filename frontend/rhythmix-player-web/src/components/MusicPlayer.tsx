@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { Howl } from 'howler';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Container,
   Button,
@@ -19,101 +18,41 @@ import {
   FaVolumeUp,
 } from 'react-icons/fa';
 import { FaShuffle, FaListUl } from 'react-icons/fa6';
-import { type SongMetadata } from '../music/model';
+import { type LyricsLine, type SongMetadata } from '../music/model';
 import LyricsList from './LyricsList';
 import PlayQueue from './PlayQueue';
+import {useMusicPlayerStore, type UseMusicPlayerStore} from 'container/musicPlayer';
 
-interface MusicPlayerProps {
-  queue: SongMetadata[];
-  onQueueChange: (queue: SongMetadata[]) => void;
-}
+const MusicPlayer: React.FC = () => {
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
-  const soundRef = useRef<Howl | null>(null);
-  const [songMetadata, setSongMetadata] = useState<SongMetadata>(queue[0] || {});
-  const [isPlaying, setIsPlaying] = useState(false);
+  const queue = useMusicPlayerStore((state: UseMusicPlayerStore) => state.queue);
+  const setVolume = useMusicPlayerStore((state: UseMusicPlayerStore) => state.setVolume);
+  const isShuffling = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isShuffling);
+  const isRepeating = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isRepeating);
+  const isPlaying = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isPlaying);
+  const seekTo = useMusicPlayerStore((state: UseMusicPlayerStore) => state.seekTo);
+  const getCurrentSong = useMusicPlayerStore((state: UseMusicPlayerStore) => state.getCurrentSong);
+  const togglePlayPause = useMusicPlayerStore((state:UseMusicPlayerStore) => state.togglePlayPause);
+  const toggleShuffle = useMusicPlayerStore((state:UseMusicPlayerStore) => state.toggleShuffle);
+  const getVolume = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getVolume);
+  const toggleRepeat = useMusicPlayerStore((state:UseMusicPlayerStore) => state.toggleRepeat);
+  const getSeek = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getSeek);
+
+  const songMetadata:SongMetadata = getCurrentSong();
+  const [playing, setIsPlaying] = useState(isPlaying);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentLine, setCurrentLine] = useState(0);
-  const [volume, setVolume] = useState(1);
   const [showQueue, setShowQueue] = useState(false);
-  const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
+  const [shuffle, setShuffle] = useState(isShuffling);
+  const [repeat, setRepeat] = useState(isRepeating);
   const lyricRefs = useRef<Array<HTMLLIElement | null>>([]);
-  const lyricsArray = useMemo(() => songMetadata.lyrics || [], [songMetadata]);
-
-  const currentUrlRef = useRef<string | null>(null);
-
-  // Create (or recreate) a Howl instance
-  const createSound = (song: SongMetadata) => {
-    // Unload previous Howl instance completely
-    if (soundRef.current) {
-      soundRef.current.stop();
-      soundRef.current.unload();
-    }
-
-    // Omit html5:true so Howler uses Web Audio API by default
-    const sound = new Howl({
-      src: [song.url],
-      volume,
-      preload: true,               // Preload audio (metadata + data)
-      onplay: () => {
-        currentUrlRef.current = song.url;
-        setIsPlaying(true);
-        setDuration(sound.duration());
-      },
-      onpause: () => setIsPlaying(false),
-      onstop: () => setIsPlaying(false),
-      onend: () => {
-        if (repeat) {
-          sound.play();
-        } else {
-          const nextSong = dequeue();
-          if (nextSong) {
-            setSongMetadata(nextSong);
-          } else {
-            setIsPlaying(false);
-          }
-        }
-      },
-    });
-
-    soundRef.current = sound;
-    return sound;
-  };
-
-  // Play the given track, but only if it's not already playing
-  const playTrack = (song: SongMetadata) => {
-    if (song.url === currentUrlRef.current) return;
-    setSongMetadata(song);
-    createSound(song).play();
-  };
-
-  // Dequeue the next track
-  const dequeue = () => {
-    const [, ...rest] = queue;
-    onQueueChange(rest);
-    return queue[0];
-  };
-
-  // Remove arbitrary track from queue
-  const removeAt = (i: number) => {
-    const updated = [...queue.slice(0, i), ...queue.slice(i + 1)];
-    onQueueChange(updated);
-  };
-
-  // Toggle play/pause
-  const togglePlay = () => {
-    const s = soundRef.current;
-    if (!s) return;
-    s.playing() ? s.pause() : s.play();
-  };
+  const lyricsArray:LyricsLine[] = getCurrentSong().lyrics;
 
   // Update volume
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseFloat(e.target.value);
     setVolume(vol);
-    soundRef.current?.volume(vol);
   };
 
   // Seek
@@ -121,28 +60,29 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pos = (e.clientX - rect.left) / rect.width;
     const time = pos * duration;
-    soundRef.current?.seek(time);
+    seekTo(time);
+    setDuration(time);
     setProgress(time);
   };
 
   // Progress updater
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!playing) return;
     const iv = setInterval(() => {
-      if (soundRef.current?.playing()) {
-        setProgress(soundRef.current.seek() as number);
+      if (playing) {
+        setProgress(getSeek());
       }
     }, 200);
     return () => clearInterval(iv);
-  }, [isPlaying]);
+  }, [setIsPlaying,progress]);
 
-  // Lyrics sync (throttled)
+  // Lyrics sync
   useEffect(() => {
     if (!isPlaying || !lyricsArray.length) return;
     let last = Date.now();
     const iv = setInterval(() => {
-      const t = soundRef.current?.seek() as number;
-      let idx = lyricsArray.findIndex((l, i) => l.time > t) - 1;
+      const t = getSeek();
+      let idx = lyricsArray.findIndex((l) => l.time > t) - 1;
       if (idx < 0) idx = lyricsArray.length - 1;
       if (idx !== currentLine && Date.now() - last > 250) {
         setCurrentLine(idx);
@@ -156,13 +96,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
   // Format seconds to m:ss
   const formatTime = (t: number) =>
     isNaN(t) ? '0:00' : `${Math.floor(t / 60)}:${('0' + Math.floor(t % 60)).slice(-2)}`;
-
-  // When queue changes, only start new track if different
-  useEffect(() => {
-    if (queue.length && queue[0].url !== currentUrlRef.current) {
-      playTrack(queue[0]);
-    }
-  }, [queue]);
 
   function toggleQueue(): void {
     setShowQueue((prev) => !prev);
@@ -199,17 +132,26 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
 
             <div className="d-flex justify-content-center gap-3 mb-3">
               <OverlayTrigger overlay={<Tooltip>Shuffle</Tooltip>}>
-                <Button variant={shuffle ? 'success' : 'outline-light'} onClick={() => setShuffle(!shuffle)}>
+                <Button variant={shuffle ? 'success' : 'outline-light'} onClick={() => {
+                  setShuffle(!shuffle);
+                  toggleShuffle();
+                }}>
                   <FaShuffle />
                 </Button>
               </OverlayTrigger>
-              <OverlayTrigger overlay={<Tooltip>{isPlaying ? 'Pause' : 'Play'}</Tooltip>}>
-                <Button variant="light" onClick={togglePlay}>
-                  {isPlaying ? <FaPause /> : <FaPlay />}
+              <OverlayTrigger overlay={<Tooltip>{playing ? 'Pause' : 'Play'}</Tooltip>}>
+                <Button variant="light" onClick={() =>{
+                  togglePlayPause();
+                  setIsPlaying(!isPlaying);
+                }}>
+                  {playing ? <FaPause /> : <FaPlay />}
                 </Button>
               </OverlayTrigger>
               <OverlayTrigger overlay={<Tooltip>Repeat</Tooltip>}>
-                <Button variant={repeat ? 'warning' : 'outline-light'} onClick={() => setRepeat(!repeat)}>
+                <Button variant={repeat ? 'warning' : 'outline-light'} onClick={() => {
+                  setRepeat(!repeat);
+                  toggleRepeat();
+                }}>
                   <FaRedo />
                 </Button>
               </OverlayTrigger>
@@ -220,7 +162,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
                 <FaVolumeUp />
               </Col>
               <Col className="mt-2">
-                <Form.Range value={volume} min={0} max={1} step={0.01} onChange={changeVolume} />
+                <Form.Range value={getVolume()} min={0} max={1} step={0.01} onChange={changeVolume} />
               </Col>
               <Col xs="auto">
                 <OverlayTrigger overlay={<Tooltip>Show Play Queue</Tooltip>}>
@@ -235,13 +177,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ queue, onQueueChange }) => {
         </Card>
 
         <PlayQueue
-          queue={queue}
           show={showQueue}
           onHide={toggleQueue}
-          onClear={() => onQueueChange([])}
-          playTrack={playTrack}
-          loading={false}
-          removeAt={removeAt}
         />
       </Container>
     </Container>
