@@ -41,3 +41,9 @@ declare module 'container/musicPlayer' {
 
   export const useMusicPlayerStore: UseMusicPlayerStore;
 }
+
+declare module 'container/MockedMusic' {
+  import type { SongMetadata } from './model';
+  const trackList: SongMetadata[];
+  export default trackList;
+}

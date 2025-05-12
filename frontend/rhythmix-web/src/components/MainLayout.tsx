@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
-import Footer from './Footer';
 import { FaHome } from 'react-icons/fa';
 import { MdLibraryMusic, MdLogout } from "react-icons/md";
 import { Nav, } from 'react-bootstrap';
@@ -32,8 +31,6 @@ const MainLayout: React.FC<{ children: React.ReactNode, footer?: React.ReactNode
       <main style={{ paddingTop: '56px' }}>
         {children}
       </main>
-
-      <Footer />
     </div>
   );
 }
