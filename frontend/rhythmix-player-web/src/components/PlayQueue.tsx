@@ -86,8 +86,11 @@ const PlayQueue: React.FC<{ show: boolean; onHide: () => void }> = ({ show, onHi
                       onClick={() => playTrack(currentTrackIndex + 1 + idx)}>
                       <FaPlay />
                     </Button>
-                    <Button size="sm" variant="outline-danger"
-                      onClick={() => removeSongFromQueue(t.id!)}>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => removeSongFromQueue(currentTrackIndex + 1 + idx)} // ✅ index
+                    >
                       <FaTrash />
                     </Button>
                   </div>
