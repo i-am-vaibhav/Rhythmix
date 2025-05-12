@@ -17,7 +17,7 @@ import {
   FaRedo,
   FaVolumeUp,
 } from 'react-icons/fa';
-import { FaShuffle, FaListUl } from 'react-icons/fa6';
+import { FaShuffle, FaListUl, FaBackward, FaForward } from 'react-icons/fa6';
 import { type LyricsLine, type SongMetadata } from '../music/model';
 import LyricsList from './LyricsList';
 import PlayQueue from './PlayQueue';
@@ -37,11 +37,17 @@ const MusicPlayer: React.FC = () => {
   const getVolume = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getVolume);
   const toggleRepeat = useMusicPlayerStore((state:UseMusicPlayerStore) => state.toggleRepeat);
   const getSeek = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getSeek);
+  const getCurrentSongDuration = useMusicPlayerStore((state:UseMusicPlayerStore) => state.getCurrentSongDuration);
+
+  const playPreviousTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playPreviousTrack);
+  const playNextTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playNextTrack);
+  const currentTrackIndex = useMusicPlayerStore((state:UseMusicPlayerStore) => state.currentTrackIndex);
+
 
   const songMetadata:SongMetadata = getCurrentSong();
   const [playing, setIsPlaying] = useState(isPlaying);
   const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const duration = getCurrentSongDuration();
   const [currentLine, setCurrentLine] = useState(0);
   const [showQueue, setShowQueue] = useState(false);
   const [shuffle, setShuffle] = useState(isShuffling);
@@ -59,22 +65,21 @@ const MusicPlayer: React.FC = () => {
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pos = (e.clientX - rect.left) / rect.width;
-    const time = pos * duration;
+    const time = duration ? pos * duration : 0;
     seekTo(time);
-    setDuration(time);
     setProgress(time);
   };
 
-  // Progress updater
+  // Progress Updater
   useEffect(() => {
     if (!playing) return;
+
     const iv = setInterval(() => {
-      if (playing) {
-        setProgress(getSeek());
-      }
+      setProgress(getSeek());
     }, 200);
+
     return () => clearInterval(iv);
-  }, [setIsPlaying,progress]);
+  }, [playing, getSeek]);
 
   // Lyrics sync
   useEffect(() => {
@@ -123,32 +128,46 @@ const MusicPlayer: React.FC = () => {
             </Row>
 
             <div onClick={handleSeek} style={{ width: '100%', cursor: 'pointer' }}>
-              <ProgressBar now={(progress / duration) * 100} className="mb-3" style={{ height: 6 }} />
+              <ProgressBar now={(progress / (duration || 1)) * 100} className="mb-3" style={{ height: 6 }} />
             </div>
             <div className="d-flex justify-content-between small mb-3">
               <span>{formatTime(progress)}</span>
-              <span>{formatTime(duration)}</span>
+              <span>{formatTime(duration || 0)}</span>
             </div>
 
             <div className="d-flex justify-content-center gap-3 mb-3">
               <OverlayTrigger overlay={<Tooltip>Shuffle</Tooltip>}>
-                <Button variant={shuffle ? 'success' : 'outline-light'} onClick={() => {
+                <Button className='btn-rounded-circle' variant={shuffle ? 'success' : 'outline-light'} onClick={() => {
                   setShuffle(!shuffle);
                   toggleShuffle();
                 }}>
                   <FaShuffle />
                 </Button>
               </OverlayTrigger>
+              <OverlayTrigger overlay={<Tooltip>Play Previous Track</Tooltip>}>
+                <Button className='btn-rounded-circle' disabled={currentTrackIndex==0} variant={'outline-light'} onClick={() => {
+                  playPreviousTrack()
+                }}>
+                  <FaBackward/>
+                </Button>
+              </OverlayTrigger>
               <OverlayTrigger overlay={<Tooltip>{playing ? 'Pause' : 'Play'}</Tooltip>}>
-                <Button variant="light" onClick={() =>{
+                <Button className='btn-rounded-circle' variant="light" onClick={() =>{
                   togglePlayPause();
                   setIsPlaying(!isPlaying);
                 }}>
                   {playing ? <FaPause /> : <FaPlay />}
                 </Button>
               </OverlayTrigger>
-              <OverlayTrigger overlay={<Tooltip>Repeat</Tooltip>}>
-                <Button variant={repeat ? 'warning' : 'outline-light'} onClick={() => {
+              <OverlayTrigger overlay={<Tooltip>Play Next Track</Tooltip>}>
+                <Button className='btn-rounded-circle' disabled={queue.length == currentTrackIndex+1} variant={'outline-light'} onClick={() => {
+                  playNextTrack()
+                }}>
+                  <FaForward/>
+                </Button>
+              </OverlayTrigger>
+              <OverlayTrigger  overlay={<Tooltip>Repeat</Tooltip>}>
+                <Button className='btn-rounded-circle' variant={repeat ? 'warning' : 'outline-light'} onClick={() => {
                   setRepeat(!repeat);
                   toggleRepeat();
                 }}>

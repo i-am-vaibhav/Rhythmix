@@ -209,7 +209,7 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
       const songIndex = queue.findIndex((track) => track.id === song.id);
       if (songIndex !== -1) {
         addSongToQueue(song);
-        playTrackInternal(0);
+        playTrackInternal(songIndex);
       } else {
         set(state => ({ queue: [...state.queue, song] }));
         playTrackInternal(queue.length);
