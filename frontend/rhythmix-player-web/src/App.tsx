@@ -1,18 +1,19 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import MusicPlayer from './components/MusicPlayer'
-import FooterMusicPlayer from './components/FooterMusicPlayer'
+import MusicPlayer from './components/MusicPlayer.tsx'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-function App() {
+import './index.css'
 
+const App: React.FC = () => {
+  
   return (
-    <>
+  <>
     <Routes>
-      <Route path="/footer" element={<FooterMusicPlayer/>} />
-      <Route path="/music" element={<MusicPlayer/>} />
+    <Route path="/music" element={<MusicPlayer />} />
     </Routes>
-    </>
-  )
-}
+  </>
+  );
+};
 
 export default App

@@ -1,12 +1,3 @@
-declare module 'container/AuthStore' {
-  export const useAuthStore: any;
-}
-
-declare module 'container/MockedMusic' {
-  const trackList: SongMetadata[];
-  export default trackList;
-}
-
 declare module 'container/musicPlayer' {
   import { Howl } from 'howler';
   import type { SongMetadata } from './music/model';
@@ -43,7 +34,6 @@ declare module 'container/musicPlayer' {
     getCurrentSongDuration: () => number | null;
     getCurrentSong: () => SongMetadata | null;
     playTrackAt: (index: number) => void;
-    playTrackSong: (song:SongMetadata) => void;
   }
 
   export type UseMusicPlayerStore = UseBoundStore<MusicPlayerState & MusicPlayerActions>;

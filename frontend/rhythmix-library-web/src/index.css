@@ -1,0 +1,51 @@
+html, body {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+body {
+  background-color: #121212;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #FF5722;
+  text-decoration: underline;
+}
+
+.navbar-brand {
+  color: #FF5722 !important;
+}
+
+.btn-primary {
+  background-color: #FF5722;
+  border-color: #FF5722;
+}
+
+.btn-outline-light:hover {
+  background-color: #ffffff;
+  color: #121212;
+}
+
+.bg-primary{
+  background-color: #FF5722 !important;
+  --bs-bg-opacity: 1;
+}
+
+footer {
+  background-color: #121212;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  color: #ffffff;
+}
+
+::placeholder {
+  color: #888 !important; /* Ensure it's visible against dark backgrounds */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #888 !important;
+}

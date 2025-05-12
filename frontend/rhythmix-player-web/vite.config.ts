@@ -3,10 +3,19 @@ import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://pagalfree.com',  // The backend API server
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   plugins: [
     react(),
     federation({
-      name: "library_web",
+      name: "player_web",
       filename: "remoteEntry.js",
       exposes: {
         './App': './src/App',
@@ -19,7 +28,9 @@ export default defineConfig({
         "react-icons",
         "react-dom",
         "zustand",
-        "react-router-dom"
+        "react-router-dom",
+        "react-bootstrap",
+        "bootstrap",  
       ], 
     }),
   ],
@@ -35,5 +46,5 @@ export default defineConfig({
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
-  },
+  }
 });

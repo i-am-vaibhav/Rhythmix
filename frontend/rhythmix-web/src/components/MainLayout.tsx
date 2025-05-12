@@ -7,7 +7,7 @@ import { MdLibraryMusic, MdLogout } from "react-icons/md";
 import { Nav, } from 'react-bootstrap';
 import { useAuthStore } from '../store/authStore';
 
-const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children })  => {
+const MainLayout: React.FC<{ children: React.ReactNode, footer?: React.ReactNode }> = ({ children })  => {
   const navigate = useNavigate();
   const {toggleLogoutFlag, logout} = useAuthStore(); 
 
