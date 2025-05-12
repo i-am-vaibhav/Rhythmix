@@ -176,7 +176,7 @@ const trackList: SongMetadata[] = [
     album: "Paisaa",
     coverArt: "https://m.media-amazon.com/images/M/MV5BN2Y4M2ZiNjQtZDYxMS00MGY4LTlhMjYtODdlMTNmYWIzOWE3XkEyXkFqcGc@._V1_.jpg",
     id: "2",
-    lyrics: mockLyrics2
+    lyrics: mockLyrics2,
   },
   {
     url: "https://pagalfree.com/download/128-GOAT%20-%20GOAT%20128%20Kbps.mp3",
@@ -185,7 +185,43 @@ const trackList: SongMetadata[] = [
     album: "GOAT",
     coverArt: "https://i1.sndcdn.com/artworks-TxeyXAXkvyQLKwE6-jN9Q0w-t500x500.jpg",
     id: "3",
-    lyrics: mockLyrics3
+    lyrics: mockLyrics3,
+  },
+  {
+    url: "https://pagalfree.com/download/128-Nasha%20-%20Raid%202%20128%20Kbps.mp3",
+    title: "Nasha",
+    artist: "Amar Jalal",
+    album: "Raid 2",
+    coverArt: "https://pagalfree.com/images/128Nasha%20-%20Raid%202%20128%20Kbps.jpg",
+    id: "4",
+    lyrics: [],
+  },
+  { 
+    url: "https://pagalfree.com/download/128-Laal%20Pari%20-%20Housefull%205%20128%20Kbps.mp3",
+    title: "Laal Pari",
+    artist: "Mika Singh",
+    album: "Housefull 5",
+    coverArt: "https://pagalfree.com/images/128Laal%20Pari%20-%20Housefull%205%20128%20Kbps.jpg",
+    id: "5",
+    lyrics: [],
+  },
+  {
+    url: "https://pagalfree.com/download/128-Apna%20Bana%20Le%20-%20Bhediya%20128%20Kbps.mp3",
+    title: "Apna Bana Le",
+    artist: "Arijit Singh",
+    album: "Bhediya",
+    coverArt: "https://pagalfree.com/images/128Apna%20Bana%20Le%20-%20Bhediya%20128%20Kbps.jpg",
+    id: "6",
+    lyrics: [],
+  },
+  {
+    url: "https://pagalfree.com/download/128-Kalank%20(Title%20Track)%20-%20Kalank%20128%20Kbps.mp3",
+    title: "Kalank (Title Track)",
+    artist: "Arijit Singh",
+    album: "Kalank",
+    coverArt: "https://pagalfree.com/images/128Kalank%20(Title%20Track)%20-%20Kalank%20128%20Kbps.jpg",
+    id: "7",
+    lyrics: [],
   }
 ];
 

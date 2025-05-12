@@ -13,8 +13,8 @@ const mockTracks = [
 
 const mockPlaylists = [
   { id: 'liked', name: 'Liked Songs', tracks: mockTracks },
-  { id: 'playlist1', name: 'Chill Vibes', tracks: [mockTracks[1], mockTracks[2]] },
-  { id: 'playlist2', name: 'Party Mix', tracks: [mockTracks[0], mockTracks[1]] },
+  { id: 'playlist1', name: 'Chill Vibes', tracks: [mockTracks[0], mockTracks[5], mockTracks[6]] },
+  { id: 'playlist2', name: 'Party Mix', tracks: [mockTracks[1], mockTracks[4], mockTracks[2],mockTracks[3]] },
 ];
 
 const Dashboard = () => {
@@ -89,10 +89,10 @@ const Dashboard = () => {
                 value={viewMode}
                 onChange={(val) => setViewMode(val)}
               >
-                <ToggleButton id="grid-view" value="grid" variant="outline-light">
+                <ToggleButton id="grid-view" value="grid" variant={viewMode == 'grid'?'primary':"outline-light"}>
                   Grid
                 </ToggleButton>
-                <ToggleButton id="list-view" value="list" variant="outline-light">
+                <ToggleButton id="list-view" value="list" variant={viewMode == 'list'?'primary':"outline-light"}>
                   List
                 </ToggleButton>
               </ToggleButtonGroup>
