@@ -2,7 +2,7 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useAuthStore } from 'container/AuthStore';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import {
   Container,
   Row,
@@ -15,6 +15,7 @@ import {
 import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
+import FooterMusicPlayer from './FooterMusicPlayer';
 
 interface DashboardProps {
   queue: SongMetadata[];
@@ -43,6 +44,9 @@ const Dashboard: React.FC<DashboardProps> = ({ queue }) => {
       <Section title="Recently Played" items={recent} />
       <Section title="Recommended Playlists" items={recommended} grid />
       <Section title="New Releases" items={newReleases} grid />
+      <Row>
+        <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
+      </Row>
     </Container>
   );
 };
@@ -54,7 +58,6 @@ interface SectionProps {
 }
 
 const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
-  const navigate = useNavigate();
   const addSongToQueue = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.addSongToQueue
   );
@@ -90,7 +93,6 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
                       variant="light"
                       className="rounded-circle p-3 m-4 shadow-lg"
                       onClick={() => {
-                        navigate('/player/music');
                         playTrackSong(item);
                       }}
                     >
