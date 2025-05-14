@@ -75,7 +75,7 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
       <Row
         className={
           grid
-            ? 'row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4'
+            ? 'row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4'
             : 'flex-nowrap overflow-auto'
         }
       >
