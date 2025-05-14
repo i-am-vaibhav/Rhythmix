@@ -70,23 +70,36 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <Container fluid className="d-flex align-items-center justify-content-center min-vh-100 bg-dark text-white">
+    <Container
+      fluid
+      className="d-flex align-items-center overflow-hidden justify-content-center min-vh-100 bg-dark text-white px-3"
+    >
       {!ready ? (
-        <Placeholder as="div" animation="glow" className="w-100 bg-dark" style={{ maxWidth: 400 }}>
-          <Placeholder xs={12} size="lg" />
-          <Placeholder xs={12} />
-          <Placeholder xs={6} />
-        </Placeholder>
+        <div
+          className="p-4 rounded bg-secondary bg-opacity-10 shadow-sm w-100 animate-placeholder"
+          style={{ maxWidth: 400 }}
+        >
+          <Placeholder as="div" animation="glow" className="w-100">
+            <Placeholder xs={12} size="lg" className="mb-3 rounded" />
+            <Placeholder xs={12} className="mb-2 rounded" />
+            <Placeholder xs={6} className="rounded" />
+          </Placeholder>
+        </div>
       ) : (
         <Form
           onSubmit={handleSubmit}
-          className="p-4 border rounded shadow-sm w-100 bg-dark text-white"
+          className="p-4 border border-secondary rounded-4 shadow w-100 bg-dark text-white"
           style={{ maxWidth: 400 }}
           noValidate
           role="form"
         >
-          <h3 className="mb-4 text-center">Login</h3>
-          {error && <div className="alert alert-danger text-danger" role="alert">{error}</div>}
+          <h3 className="mb-4 text-center fw-bold fs-4">Login</h3>
+
+          {error && (
+            <div className="alert alert-danger text-danger text-center mb-3 fade-in-slide" role="alert">
+              {error}
+            </div>
+          )}
 
           <FloatingLabel controlId="floatingUsername" label="" className="mb-3">
             <InputGroup hasValidation>
@@ -118,7 +131,7 @@ const LoginForm: React.FC = () => {
                 <FaLock />
               </InputGroup.Text>
               <Form.Control
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
                 value={formData.password}
@@ -133,6 +146,7 @@ const LoginForm: React.FC = () => {
                 variant="outline-light"
                 onClick={() => setShowPassword(!showPassword)}
                 type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </Button>
@@ -142,19 +156,26 @@ const LoginForm: React.FC = () => {
             </InputGroup>
           </FloatingLabel>
 
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <Form.Check type="checkbox" label="Remember Me" className="text-white" />
-            <Button variant="link" onClick={() => navigate('/signup')} className="p-0 text-warning">
-              Sign Up
+          <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <span className="text-white small">Don't have an account?</span>
+            <Button
+              variant="link"
+              onClick={() => navigate("/signup")}
+              className="p-0 text-warning fw-semibold text-decoration-none"
+            >
+              Register Now!
             </Button>
           </div>
 
-          <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+          <Button variant="primary" type="submit" className="w-100 fw-semibold" disabled={loading}>
             {loading ? (
               <>
-                <Spinner animation="border" size="sm" role="status" aria-hidden="true" /> Logging in...
+                <Spinner animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                Logging in...
               </>
-            ) : 'Login'}
+            ) : (
+              "Login"
+            )}
           </Button>
         </Form>
       )}

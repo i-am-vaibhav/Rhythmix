@@ -1,24 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Container, ProgressBar, Badge, Placeholder } from 'react-bootstrap';
+import {
+  Form,
+  Button,
+  Container,
+  ProgressBar,
+  Badge,
+  Placeholder,
+  Alert,
+  Spinner
+} from 'react-bootstrap';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useSignupStore } from '../store/signupStore';
 
 const options = {
-  genres: ['Pop', 'Rock', 'Hip‑Hop', 'Jazz', 'Classical', 'EDM'],
-  languages: ['English', 'Hindi', 'Spanish', 'French', 'Tamil'],
-  artists: ['Taylor Swift', 'Arijit Singh', 'Drake', 'BTS', 'Adele']
+  genres: [
+    'Pop',
+    'Rock',
+    'Hip-Hop',
+    'Rap',
+    'R&B',
+    'EDM',
+    'House',
+    'Techno',
+    'Trance',
+    'Jazz',
+    'Blues',
+    'Country',
+    'Bollywood',
+    'IndiPop',
+    'Hindustani Classical',
+    'Carnatic Classical',
+    'Ghazal',
+    'Qawwali',
+    'Sufi',
+    'Bhajan',
+    'Folk',
+    'Bhangra',
+    'Filmi (Indian Film Music)'
+  ],
+
+  languages: [
+    'Hindi', 'English', 'Tamil', 'Telugu', 'Punjabi', 'Bengali', 'Marathi',
+    'Kannada', 'Malayalam', 'Gujarati', 'Odia', 'Assamese',
+    'Bhojpuri', 'Rajasthani'
+  ],
+
+  artists: [
+    // International
+    'Taylor Swift', 'Adele', 'Drake', 'BTS', 'Ed Sheeran', 'Billie Eilish',
+    'The Weeknd', 'Bruno Mars', 'Dua Lipa', 'Coldplay',
+    // Indian
+    'Arijit Singh', 'Shreya Ghoshal', 'A. R. Rahman', 'Neha Kakkar',
+    'Sonu Nigam', 'Sunidhi Chauhan', 'Badshah', 'Honey Singh',
+    'Lata Mangeshkar', 'Kishore Kumar',
+    // Legends & Icons
+    'Michael Jackson', 'Elvis Presley', 'Madonna', 'Queen', 'Bob Marley'
+  ]
 };
+
 
 const SignupStepTwo: React.FC = () => {
   const { formData, setFormData, registerUser, resetForm } = useSignupStore();
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof options, string>>>({});
   const [ready, setReady] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setReady(true);
-  }, []);
+  useEffect(() => { setReady(true); }, []);
 
   const toggleAll = (field: keyof typeof options) => {
     const all = options[field];
@@ -27,6 +76,7 @@ const SignupStepTwo: React.FC = () => {
       ...formData,
       [field]: selected.length === all.length ? [] : all
     });
+    setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   const handleSelect = (field: keyof typeof options, value: string) => {
@@ -40,7 +90,7 @@ const SignupStepTwo: React.FC = () => {
     e.preventDefault();
     const newErrors: typeof errors = {};
     (Object.keys(options) as Array<keyof typeof options>).forEach(field => {
-      if (!((formData[field] ?? []).length > 0)) {
+      if (!(formData[field]?.length > 0)) {
         newErrors[field] = `Please select at least one ${field}`;
       }
     });
@@ -48,7 +98,9 @@ const SignupStepTwo: React.FC = () => {
       setErrors(newErrors);
       return;
     }
+    setSubmitting(true);
     const response = await registerUser();
+    setSubmitting(false);
     if (response) {
       resetForm();
       navigate('/login');
@@ -56,40 +108,48 @@ const SignupStepTwo: React.FC = () => {
   };
 
   return (
-    <Container fluid className="d-flex align-items-center justify-content-center min-vh-100 p-0 bg-dark text-light">
+    <Container
+      fluid
+      className="d-flex align-items-center my-5 justify-content-center min-vh-100 bg-dark text-white px-3"
+    >
       {!ready ? (
-        <Placeholder as="div" animation="glow" className="w-100" style={{ maxWidth: 500 }}>
-          <Placeholder xs={12} size="lg" />
-          <Placeholder xs={12} />
-        </Placeholder>
+        <div
+          className="p-4 rounded bg-secondary bg-opacity-10 shadow-sm w-100 animate-placeholder"
+          style={{ maxWidth: 500 }}
+        >
+          <Placeholder as="div" animation="glow" className="w-100">
+            <Placeholder xs={12} size="lg" className="mb-3 rounded" />
+            <Placeholder xs={12} className="mb-2 rounded" />
+          </Placeholder>
+        </div>
       ) : (
         <Form
           onSubmit={handleSubmit}
-          className="p-4 border m-5 rounded shadow-sm bg-dark text-light w-100"
+          className="p-4 border border-secondary rounded-4 shadow w-100 bg-dark text-white"
           style={{ maxWidth: 500 }}
           noValidate
         >
-          <ProgressBar now={100} label={`Step 2 of 2`} className="mb-4" variant="danger" />
+          <ProgressBar now={100} label="Step 2 of 2" className="mb-4" variant="danger" />
 
-          <h3 className="mb-4 text-center">Your Preferences</h3>
+          <h3 className="mb-4 text-center fw-bold fs-4">Your Preferences</h3>
 
           {(Object.keys(options) as Array<keyof typeof options>).map(field => (
             <Form.Group className="mb-4" key={field}>
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <Form.Label className="mb-0 text-light">
+                <Form.Label className="mb-0 text-light fw-semibold">
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                 </Form.Label>
                 <Button
                   variant="link"
                   size="sm"
-                  className="p-0 text-light"
+                  className="p-0 text-warning"
                   onClick={() => toggleAll(field)}
                 >
                   {formData[field]?.length === options[field].length ? 'Clear All' : 'Select All'}
                 </Button>
               </div>
 
-              <div className="border rounded p-2 mb-2 bg-dark">
+              <div className="border d-flex flex-wrap gap-2 border-secondary rounded p-2 mb-2 bg-dark">
                 {options[field].map(opt => (
                   <Form.Check
                     key={opt}
@@ -98,17 +158,22 @@ const SignupStepTwo: React.FC = () => {
                     label={opt}
                     checked={formData[field]?.includes(opt) || false}
                     onChange={() => handleSelect(field, opt)}
-                    className="mb-1 text-light"
+                    className="mb-2 text-white"
                   />
                 ))}
               </div>
 
-              {/* Chips: Selected Preferences */}
-              {(formData[field] ?? []).length > 0 && (
+              {/* Selected Badges */}
+              {formData[field]?.length > 0 && (
                 <div className="mb-2">
-                  {(formData[field] ?? []).map(opt => (
-                    <Badge pill bg="primary" className="me-2 mb-1" key={opt}>
-                      {opt}{' '}
+                  {formData[field].map(opt => (
+                    <Badge
+                      pill
+                      bg="primary"
+                      className="me-2 mb-2 align-items-center"
+                      key={opt}
+                    >
+                      {opt}
                       <FaTrash
                         role="button"
                         className="ms-1"
@@ -120,19 +185,31 @@ const SignupStepTwo: React.FC = () => {
                 </div>
               )}
 
-              {/* Error Message for Missing Selections */}
               {errors[field] && (
-                <div className="text-danger small mt-1">{errors[field]}</div>
+                <Alert variant="danger" className="py-1 small">
+                  {errors[field]}
+                </Alert>
               )}
             </Form.Group>
           ))}
 
           <div className="d-flex justify-content-between">
-            <Button variant="secondary" onClick={() => navigate('/signup')} className="text-light">
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/signup')}
+              className="text-light"
+            >
               Back
             </Button>
-            <Button type="submit" variant="primary" className="text-light">
-              Finish
+            <Button type="submit" variant="primary" className="text-light" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <Spinner animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                  Finishing...
+                </>
+              ) : (
+                'Finish'
+              )}
             </Button>
           </div>
         </Form>
