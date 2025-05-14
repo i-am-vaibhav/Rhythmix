@@ -34,10 +34,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (response.status == 200){
       set({
         isAuthenticated: true,
-        userData: response.data,
+        userData: response.data.userData,
         message: "",
       });
-      localStorage.setItem("userToken", JSON.stringify(response));
+      localStorage.setItem("userToken", JSON.stringify(response.data));
       return true;
     } else {
       set({

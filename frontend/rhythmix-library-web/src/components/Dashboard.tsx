@@ -47,7 +47,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Container fluid className="p-4">
+    <Container fluid className="p-4 mb-5">
       <div className="d-flex flex-column min-vh-100">
         <h3 className='text-light pt-3'><MdLibraryMusic/> Library</h3>
         {/* Main Content */}
@@ -179,15 +179,15 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className='ms-auto'>
+                  <div className='ms-auto gap-2 d-flex'>
                     <Button variant="primary"
-                      className=" shadow-lg"
+                      className="rounded-circle shadow-lg"
                       onClick={() => playTrackSong(track)}>
                       <FaPlay />
                     </Button>
                     <Button
                       variant="primary"
-                      className=" shadow-lg"
+                      className="rounded-circle shadow-lg"
                       onClick={() => addSongToQueue(track)}>
                       <FaPlus />
                     </Button>
