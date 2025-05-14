@@ -1,48 +1,61 @@
 import { create } from 'zustand';
+import { login, type ServerResponse } from './backendService';
+import type { SignupFormData } from './signupStore';
 
-export interface UserData {
-  username: string;
-  email?: string;
-  mobile?: string;
-  [key: string]: any;
+export interface LoginRequest{
+  userName: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  userData: SignupFormData;
 }
 
 export interface AuthState {
   isAuthenticated: boolean;
-  userData: UserData | null;
-  isLoggedOut: boolean;
+  userData: SignupFormData | null;
+  message: string;
 }
 
 interface AuthStore extends AuthState {
-  login: (userData: UserData) => void;
+  login: (loginRequest: LoginRequest) => Promise<boolean>;
   logout: () => void;
-  updateUser: (updates: Partial<UserData>) => void;
-  toggleLogoutFlag: () => void;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
   userData: null,
   isLoggedOut: false,
+  message: "",
 
-  toggleLogoutFlag: () => set((state) => ({ isLoggedOut: !state.isLoggedOut })),
+  login: async (loginRequest) =>{
+    const response : ServerResponse = await login(loginRequest);
+    if (response.status == 200){
+      set({
+        isAuthenticated: true,
+        userData: response.data,
+        message: "",
+      });
+      localStorage.setItem("userToken", JSON.stringify(response));
+      return true;
+    } else {
+      set({
+        isAuthenticated: false,
+        userData: null,
+        message: response.data.status,
+      });
+      return false;
+    }
+  },
 
-  login: (userData) =>
-    set({
-      isAuthenticated: true,
-      userData,
-    }),
-
-  logout: () =>
+  logout: () => {
     set({
       isAuthenticated: false,
       userData: null,
-    }),
-
-  updateUser: (updates) =>
-    set((state) => ({
-      userData: state.userData
-        ? { ...state.userData, ...updates }
-        : null,
-    })),
+      message: "You have logged out successfully",
+    })
+    localStorage.removeItem("userToken");
+  },
+  
 }));

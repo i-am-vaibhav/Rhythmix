@@ -53,15 +53,19 @@ const LoginForm: React.FC = () => {
     if (!isValid) return;
 
     setLoading(true);
-    await new Promise(res => setTimeout(res, 1000));
+    await new Promise(res => setTimeout(res, 300));
 
-    if (formData.username === 'user' && formData.password === 'password') {
-      login({ username: formData.username });
-      navigate('/home/dashboard');
+    if (formData.username !='' && formData.password != '') {
+      const success = await login({ userName: formData.username, password: formData.password });
+      if(success){
+        setLoading(false);
+        navigate('/home/dashboard');
+      }else{
+        setLoading(false);
+      }
     } else {
       setError('Invalid username or password.');
     }
-
     setLoading(false);
   };
 

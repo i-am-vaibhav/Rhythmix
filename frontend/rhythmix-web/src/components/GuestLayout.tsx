@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Nav, Toast, ToastContainer } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Footer from './Footer';
 import { MdCreate, MdLogin } from 'react-icons/md';
 import { useAuthStore } from '../store/authStore';
+import { useSignupStore } from '../store/signupStore';
 
 const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children })  => {
   const navigate = useNavigate();
-  const {isLoggedOut, toggleLogoutFlag} = useAuthStore();
+  const loginMessage = useAuthStore((state) => state.message);
+  const signupMessage = useSignupStore((state) => state.message);
+  const [notification, setNotification] = useState(false);
+
+  useEffect(() => {
+    if (loginMessage || signupMessage) {
+      setNotification(true);
+    }
+  }, [loginMessage, signupMessage]);
+
+  const handleToastClose = () => {
+    setNotification(false);
+    useAuthStore.setState({ message: '' });
+    useSignupStore.setState({ message: '' });
+  };
 
   return (
     <div>
@@ -21,17 +36,17 @@ const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children })  => 
       } />
       <ToastContainer position="top-end" className="p-3">
         <Toast
-          onClose={toggleLogoutFlag}
-          show={isLoggedOut}
+          onClose={handleToastClose}
+          show={notification}
           delay={5000}
           autohide
           bg="dark"
         >
           <Toast.Header className="bg-primary text-white">
-            <strong className="me-auto">Notification</strong>
+            <strong className="me-auto">Notification!</strong>
           </Toast.Header>
           <Toast.Body className="text-white">
-            You have logged out successfully
+            {loginMessage || signupMessage}
           </Toast.Body>
         </Toast>
       </ToastContainer>

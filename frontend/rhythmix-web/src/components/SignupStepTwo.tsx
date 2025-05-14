@@ -11,7 +11,7 @@ const options = {
 };
 
 const SignupStepTwo: React.FC = () => {
-  const { formData, setFormData } = useSignupStore();
+  const { formData, setFormData, registerUser, resetForm } = useSignupStore();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ const SignupStepTwo: React.FC = () => {
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
     (Object.keys(options) as Array<keyof typeof options>).forEach(field => {
@@ -48,7 +48,11 @@ const SignupStepTwo: React.FC = () => {
       setErrors(newErrors);
       return;
     }
-    navigate('/home/dashboard');
+    const response = await registerUser();
+    if (response) {
+      resetForm();
+      navigate('/login');
+    }
   };
 
   return (

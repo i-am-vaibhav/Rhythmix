@@ -9,12 +9,11 @@ import { useMusicPlayerStore } from '../store/musicPlayer';
 
 const MainLayout: React.FC<{ children: React.ReactNode, footer?: React.ReactNode }> = ({ children })  => {
   const navigate = useNavigate();
-  const {toggleLogoutFlag, logout} = useAuthStore(); 
+  const {logout} = useAuthStore(); 
   const stop = useMusicPlayerStore((state) => state.stop);
 
   function handleLogout(): void {
     navigate('/'); 
-    toggleLogoutFlag();
     stop();
     logout();
   }

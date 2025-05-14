@@ -6,7 +6,7 @@ import { useSignupStore } from '../store/signupStore';
 
 const SignupStepOne: React.FC = () => {
   const {formData, setFormData} = useSignupStore();
-  const [touched, setTouched] = useState({ username: false, email: false, password: false, mobile: false });
+  const [touched, setTouched] = useState({ userName: false, email: false, password: false, mobile: false });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
@@ -17,14 +17,14 @@ const SignupStepOne: React.FC = () => {
 
   const validate = () => {
     const errs: { [key: string]: string } = {};
-    if (!formData.username) errs.username = 'Username is required';
-    else if (formData.username.length < 3) errs.username = 'Username must be at least 3 characters';
+    if (!formData.userName) errs.userName = 'Username is required';
+    else if (formData.userName.length < 3) errs.username = 'Username must be at least 3 characters';
     if (!formData.email) errs.email = 'Email is required';
     else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) errs.email = 'Invalid email address';
     if (!formData.password) errs.password = 'Password is required';
     else if (formData.password.length < 6) errs.password = 'Password must be at least 6 characters';
     if (!formData.mobile) errs.mobile = 'Mobile number is required';
-    else if (!/^\d{10,15}$/.test(formData.mobile)) errs.mobile = 'Invalid mobile number';
+    else if (!/^\d{10,10}$/.test(formData.mobile)) errs.mobile = 'Invalid mobile number';
     return errs;
   };
 
@@ -44,7 +44,7 @@ const SignupStepOne: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setTouched({ username: true, email: true, password: true, mobile: true });
+    setTouched({ userName: true, email: true, password: true, mobile: true });
     const validation = validate();
     if (Object.keys(validation).length) {
       setErrors(validation);
@@ -104,7 +104,7 @@ const SignupStepOne: React.FC = () => {
           )}
 
           {/* Input Fields */}
-          {renderInput('Username', 'username', 'text', <FaUser />)}
+          {renderInput('Username', 'userName', 'text', <FaUser />)}
           {renderInput('Email', 'email', 'email', <FaEnvelope />)}
           {renderInput('Mobile', 'mobile', 'tel', <FaMobileAlt />)}
 

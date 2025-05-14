@@ -26,6 +26,7 @@ export default defineConfig({
           "./AuthStore": "./src/store/authStore.ts",
           "./MockedMusic": "./src/store/mockedMusic.ts",
           "./musicPlayer": "./src/store/musicPlayer.ts",
+          "./backendService": "./src/store/backendService.ts",
         },
         shared: {
           "react": {
