@@ -36,5 +36,3 @@ out/
 *.rej
 *.sublime-workspace
 *.sublime-project
-
-backend/
