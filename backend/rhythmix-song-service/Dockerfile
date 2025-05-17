@@ -7,6 +7,8 @@ WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
+RUN apt-get update && apt-get install -y curl && apt-get clean
+
 # Build the project (skip tests if not needed)
 RUN mvn clean package -DskipTests
 
@@ -20,7 +22,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose the default Spring Boot port
-EXPOSE 8080
+EXPOSE 8200
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

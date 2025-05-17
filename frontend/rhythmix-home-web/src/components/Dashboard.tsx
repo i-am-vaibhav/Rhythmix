@@ -30,24 +30,26 @@ const Dashboard: React.FC<DashboardProps> = ({ queue }) => {
   const newReleases: SongMetadata[] = [...queue];
 
   return (
-    <Container fluid className="p-4">
-      {/* Greeting & Search */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3>Welcome back, {userData.username}!</h3>
-        <InputGroup style={{ maxWidth: 300 }}>
-          <InputGroup.Text><FaSearch /></InputGroup.Text>
-          <FormControl placeholder="Search music" aria-label="Search music" />
-        </InputGroup>
-      </div>
+    <>
+      <Container fluid className="p-4 mb-5">
+        {/* Greeting & Search */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h3>Welcome back, {userData.userName}!</h3>
+          <InputGroup style={{ maxWidth: 300 }}>
+            <InputGroup.Text><FaSearch /></InputGroup.Text>
+            <FormControl placeholder="Search music" aria-label="Search music" />
+          </InputGroup>
+        </div>
 
-      {/* Sections */}
-      <Section title="Recently Played" items={recent} />
-      <Section title="Recommended Playlists" items={recommended} grid />
-      <Section title="New Releases" items={newReleases} grid />
+        {/* Sections */}
+        <Section title="Recently Played" items={recent} />
+        <Section title="Recommended Playlists" items={recommended} grid />
+        <Section title="New Releases" items={newReleases} grid />
+      </Container>
       <Row>
         <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
       </Row>
-    </Container>
+    </>
   );
 };
 
@@ -73,7 +75,7 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
       <Row
         className={
           grid
-            ? 'row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4'
+            ? 'row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4'
             : 'flex-nowrap overflow-auto'
         }
       >
