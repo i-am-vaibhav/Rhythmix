@@ -111,7 +111,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "8762:8761"
+      - "8761:8761"
     environment:
       - rhythmix_auth_service_url=http://rhythmix-auth-service:8100
       - rhythmix_song_service_url=http://rhythmix-auth-service:8200
