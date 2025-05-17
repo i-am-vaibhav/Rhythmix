@@ -6,7 +6,6 @@ import org.springframework.cloud.config.server.EnableConfigServer;
 
 @EnableConfigServer
 @SpringBootApplication
-@EnableConfigServer
 public class RhythmixConfigServerApplication {
 
 	public static void main(String[] args) {
