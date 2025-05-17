@@ -86,7 +86,7 @@ public class SongServiceImpl implements SongService {
         }
         SongAudit songAudit = SongAudit.builder()
                 .song(songRepository.getReferenceById(songAuditRequest.songId()))
-                .user_id(userId).build();
+                .userId(userId).build();
         songAuditRepository.save(songAudit);
     }
 }

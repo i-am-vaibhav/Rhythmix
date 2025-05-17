@@ -25,7 +25,7 @@ public class SongAudit {
     @JoinColumn(name = "song_id", unique=true, nullable=false, updatable=false)
     private Song song;
 
-    private UUID user_id;
+    private UUID userId;
 
     @CreationTimestamp
     private Instant createdAt;

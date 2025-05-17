@@ -69,12 +69,30 @@ services:
     ports:
       - "8888:8888"
 
+  rhythmix-auth-service:
+    container_name: rhythmix-auth-service
+    depends_on:
+      rhythmix-config-server:
+        condition: service_started
+      rhythmix-gateway:
+        condition: service_started
+    restart: unless-stopped
+    build:
+      context: ./backend/rhythmix-auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
+
   rhythmix-song-service:
     container_name: rhythmix-song-service
     depends_on:
       rhythmix-postgres:
         condition: service_healthy
       rhythmix-config-server:
+        condition: service_started
+      rhythmix-gateway:
         condition: service_started
     restart: unless-stopped
     build:
@@ -85,3 +103,15 @@ services:
     environment:
       - POSTGRES_JDBC_URL=jdbc:postgresql://rhythmix-postgres:5432/rhythmix
       - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
+
+  rhythmix-gateway:
+    container_name: rhythmix-gateway
+    build:
+      context: ./backend/rhythmix-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8762:8761"
+    environment:
+      - rhythmix_auth_service_url=http://rhythmix-auth-service:8100
+      - rhythmix_song_service_url=http://rhythmix-auth-service:8200

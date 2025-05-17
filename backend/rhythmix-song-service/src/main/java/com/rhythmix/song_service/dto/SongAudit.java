@@ -18,7 +18,7 @@ public class SongAudit {
 
     private Song song;
 
-    private UUID user_id;
+    private UUID userId;
 
     private Instant createdAt;
 }
