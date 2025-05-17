@@ -3,6 +3,9 @@ package com.rhythmix.song_service.service;
 import com.rhythmix.song_service.converter.SongConverter;
 import com.rhythmix.song_service.dto.PreferenceType;
 import com.rhythmix.song_service.dto.Song;
+import com.rhythmix.song_service.dto.SongAuditRequest;
+import com.rhythmix.song_service.model.SongAudit;
+import com.rhythmix.song_service.repository.SongAuditRepository;
 import com.rhythmix.song_service.repository.SongRepository;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class SongServiceImpl implements SongService {
@@ -21,10 +25,13 @@ public class SongServiceImpl implements SongService {
 
     private final SongRepository songRepository;
 
+    private final SongAuditRepository songAuditRepository;
+
     private final SongConverter songConverter = Mappers.getMapper(SongConverter.class);
 
-    public SongServiceImpl(SongRepository songRepository) {
+    public SongServiceImpl(SongRepository songRepository, SongAuditRepository songAuditRepository) {
         this.songRepository = songRepository;
+        this.songAuditRepository = songAuditRepository;
     }
 
     @Override
@@ -61,5 +68,25 @@ public class SongServiceImpl implements SongService {
     public Page<Song> getSongs(int page, int pageSize) {
         return songRepository.findAll(PageRequest.of(page, pageSize))
                 .map(songConverter::toDto);
+    }
+
+    @Override
+    public List<Song> getRecentlyPlayedSongs(UUID userId) {
+        return songAuditRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId)
+                .stream().map(songAudit -> songConverter.toDto(songAudit.getSong()))
+                .distinct().toList();
+    }
+
+    @Override
+    public void auditSong(SongAuditRequest songAuditRequest) {
+        UUID userId = songAuditRequest.userId();
+        long auditCount = songAuditRepository.countByUserId(userId);
+        if (auditCount > 9){
+            songAuditRepository.deleteFirstByUserIdOrderByCreatedAtAsc(userId);
+        }
+        SongAudit songAudit = SongAudit.builder()
+                .song(songRepository.getReferenceById(songAuditRequest.songId()))
+                .user_id(userId).build();
+        songAuditRepository.save(songAudit);
     }
 }

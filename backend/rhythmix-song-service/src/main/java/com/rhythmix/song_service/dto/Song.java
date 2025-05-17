@@ -1,10 +1,7 @@
 package com.rhythmix.song_service.dto;
 
 import com.rhythmix.song_service.model.Lyrics;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = "lyrics")
 public class Song {
     private BigDecimal id;
     private String url;

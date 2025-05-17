@@ -7,6 +7,8 @@ WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
+RUN apt-get update && apt-get install -y curl && apt-get clean
+
 # Build the project (skip tests if not needed)
 RUN mvn clean package -DskipTests
 
