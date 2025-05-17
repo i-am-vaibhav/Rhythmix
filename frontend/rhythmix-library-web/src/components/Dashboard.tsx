@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, InputGroup, ToggleButtonGroup, ToggleButton, ButtonGroup, Spinner, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, InputGroup, ButtonGroup, Spinner, ListGroup } from 'react-bootstrap';
 import { FaSearch, FaPlay } from 'react-icons/fa';
 import FooterMusicPlayer from './FooterMusicPlayer';
 import trackList from "container/MockedMusic";
@@ -47,7 +47,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Container fluid className="p-4">
+    <Container fluid className="p-4 mb-5">
       <div className="d-flex flex-column min-vh-100">
         <h3 className='text-light pt-3'><MdLibraryMusic/> Library</h3>
         {/* Main Content */}
@@ -83,24 +83,19 @@ const Dashboard = () => {
               </InputGroup>
             </Col>
             <Col xs={12} md={4} className="text-md-end">
-              <ToggleButtonGroup
-                type="radio"
-                name="viewMode"
-                value={viewMode}
-                onChange={(val) => setViewMode(val)}
-              >
-                <ToggleButton id="grid-view" value="grid" variant={viewMode == 'grid'?'primary':"outline-light"}>
+              <ButtonGroup>
+                <Button value="grid" onClick={() => setViewMode('grid')} variant={viewMode == 'grid'?'primary':"outline-light"}>
                   Grid
-                </ToggleButton>
-                <ToggleButton id="list-view" value="list" variant={viewMode == 'list'?'primary':"outline-light"}>
+                </Button>
+                <Button value="list" onClick={() => setViewMode('list')} variant={viewMode == 'list'?'primary':"outline-light"}>
                   List
-                </ToggleButton>
-              </ToggleButtonGroup>
+                </Button>
+              </ButtonGroup>
             </Col>
           </Row>
 
           <Button
-            variant="light"
+            variant="primary"
             className="shadow-lg mb-4"
             onClick={() => {
               clearQueue();
@@ -179,20 +174,20 @@ const Dashboard = () => {
                       <div className="fw-semibold text-truncate" style={{ maxWidth: 200 }}>
                         {track.title}
                       </div>
-                      <div className="text-muted text-truncate" style={{ maxWidth: 200 }}>
+                      <div className="small text-truncate" style={{ maxWidth: 200 }}>
                         {track.artist}
                       </div>
                     </div>
                   </div>
-                  <div className='ms-auto'>
-                    <Button variant="outline-light"
-                      className=" shadow-lg"
+                  <div className='ms-auto gap-2 d-flex'>
+                    <Button variant="primary"
+                      className="rounded-circle shadow-lg"
                       onClick={() => playTrackSong(track)}>
                       <FaPlay />
                     </Button>
                     <Button
-                      variant="outline-light"
-                      className=" shadow-lg"
+                      variant="primary"
+                      className="rounded-circle shadow-lg"
                       onClick={() => addSongToQueue(track)}>
                       <FaPlus />
                     </Button>

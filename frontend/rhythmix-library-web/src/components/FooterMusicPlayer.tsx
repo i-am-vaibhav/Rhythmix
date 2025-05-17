@@ -51,7 +51,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
 
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const vol = parseFloat(e.target.value);
-    setVolume(vol);
+    setVolume(vol/100);
   };
 
   // Seek
