@@ -7,14 +7,14 @@ WORKDIR /app
 COPY pom.xml ./
 COPY src ./src
 
-RUN apt-get update && apt-get install -y curl && apt-get clean
-
 # Build the project (skip tests if not needed)
 RUN mvn clean package -DskipTests
 
 # Step 2: Use a lightweight base image to run the app
 FROM eclipse-temurin:21-jdk-alpine
 
+
+RUN apk add --no-cache curl
 # Set work directory
 WORKDIR /app
 

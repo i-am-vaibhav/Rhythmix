@@ -13,6 +13,8 @@ RUN mvn clean package -DskipTests
 # Step 2: Use a lightweight base image to run the app
 FROM eclipse-temurin:21-jdk-alpine
 
+RUN apk add --no-cache curl
+
 # Set work directory
 WORKDIR /app
 
