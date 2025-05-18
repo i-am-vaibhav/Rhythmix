@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Optional: Expose port (for web apps),
-EXPOSE 8300
+EXPOSE 8080
 
 # Entry point,
 ENTRYPOINT ["dotnet", "rhythmix_user_services.dll"]
