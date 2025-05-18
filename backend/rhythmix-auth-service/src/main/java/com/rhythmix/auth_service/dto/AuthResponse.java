@@ -1,6 +1,9 @@
 package com.rhythmix.auth_service.dto;
 
-public record AuthResponse(String token, UserRegResponse userRegResponse) {
+import lombok.Builder;
+
+@Builder
+public record AuthResponse(String token, UserRegResponse userData) {
 }
 
 

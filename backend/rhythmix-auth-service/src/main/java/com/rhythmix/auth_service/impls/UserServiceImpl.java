@@ -21,12 +21,12 @@ public class UserServiceImpl implements UserService {
     private final RestTemplate restTemplate;
     private final String userServiceBaseUrl;
     public UserServiceImpl(RestTemplate restTemplate,
-                           @Value("${user.service.base-url:http://localhost:8100}") String userServiceBaseUrl) {
+                           @Value("${user.service.base-url:http://localhost:8300}") String userServiceBaseUrl) {
         this.restTemplate = restTemplate;
         this.userServiceBaseUrl = userServiceBaseUrl;
     }
 
-    public UserRegResponse createUser (UserRequest request){
+    public UserRegResponse createUser(UserRequest request){
         String url = UriComponentsBuilder
                 .fromHttpUrl(userServiceBaseUrl)
                 .path("/users")
@@ -58,8 +58,8 @@ public class UserServiceImpl implements UserService {
     public UserAuthResponse getUser(String userName) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(userServiceBaseUrl)
-                .path("/users")
-                .queryParam("userName", userName)
+                .path("/users/{userName}")
+                .buildAndExpand(userName)
                 .toUriString();
 
         HttpHeaders headers = new HttpHeaders();
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
                     url,
                     HttpMethod.GET,
                     entity,
-                     UserAuthResponse.class
+                    UserAuthResponse.class
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {

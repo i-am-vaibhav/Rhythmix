@@ -12,13 +12,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-        private final JwtUtils jwtUtil;
 
-        private final UserService userService;
+    private final JwtUtils jwtUtil;
 
-        private final CustomPasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-        private final UserConverter userConverter = Mappers.getMapper(UserConverter.class);
+    private final CustomPasswordEncoder passwordEncoder;
+
+    private final UserConverter userConverter = Mappers.getMapper(UserConverter.class);
 
     public AuthServiceImpl(JwtUtils jwtUtil, UserService userService, CustomPasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
@@ -27,11 +28,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public RegResponse registerUser(UserRequest request) {
-        UserRegResponse userRespose = userService.createUser(request);
+        String password = request.password();
+        UserRegResponse userResponse = userService.createUser(UserRequest.builder()
+                .email(request.email()).metadata(request.metadata())
+                .userName(request.userName()).phone(request.phone())
+                .password(passwordEncoder.hash(password))
+                .build());
 
-        String token = generateTokenByUserName(userRespose.userName());
-
-        return new RegResponse(token,userRespose);
+        return RegResponse.builder().userData(userResponse)
+                .token(generateTokenByUserName(userResponse.userName()))
+                .build();
     }
 
     public AuthResponse authenticate(AuthRequest request)  throws IllegalArgumentException {
@@ -43,9 +49,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UserRegResponse userRegResponse = userConverter.toUserRegResponse(userAuthResponse);
-        String token = generateTokenByUserName(userRegResponse.userName());
 
-        return new AuthResponse(token,userRegResponse);
+        return AuthResponse.builder().userData(userRegResponse)
+                .token(generateTokenByUserName(userRegResponse.userName()))
+                .build();
     }
 
     @Override
