@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public class RhythmixAuthServiceApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(RhythmixAuthServiceApplication.class, args);
 	}
 
