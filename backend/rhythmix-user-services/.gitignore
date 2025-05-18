@@ -1,44 +1,4 @@
-# Node.js / React
-node_modules/
-build/
-dist/
-.env
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-.DS_Store
-
-# Spring Boot
-target/
-*.log
-*.class
-*.jar
-*.war
-*.ear
-*.iml
-*.iws
-*.ipr
-*.project
-.settings/
-.idea/
-.gradle/
-build/
-out/
-.env
-*.bat
-*.sh
-*.swp
-*.bak
-*.tmp
-*.old
-*.orig
-*.rej
-*.sublime-workspace
-*.sublime-project
-
-
-# .Net 8.0
+# Build folders
 bin/
 obj/
 
