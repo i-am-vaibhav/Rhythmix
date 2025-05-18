@@ -1,0 +1,19 @@
+spring:
+  application:
+   name: rhythmix-gateway
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://localhost:8888}
+      fail-fast: true
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  main:
+    web-application-type: reactive
+
+server:
+  port: 8761

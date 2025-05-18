@@ -84,6 +84,7 @@ services:
       - "8100:8100"
     environment:
       - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
 
   rhythmix-song-service:
     container_name: rhythmix-song-service
@@ -103,6 +104,7 @@ services:
     environment:
       - POSTGRES_JDBC_URL=jdbc:postgresql://rhythmix-postgres:5432/rhythmix
       - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
 
   rhythmix-gateway:
     container_name: rhythmix-gateway
@@ -115,3 +117,6 @@ services:
     environment:
       - rhythmix_auth_service_url=http://rhythmix-auth-service:8100
       - rhythmix_song_service_url=http://rhythmix-auth-service:8200
+      - SPRING_PROFILES_ACTIVE=dev
+      - FRONTEND_URL=http://localhost:5173
+

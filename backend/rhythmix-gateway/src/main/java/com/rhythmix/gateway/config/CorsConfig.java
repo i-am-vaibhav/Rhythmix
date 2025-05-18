@@ -1,5 +1,6 @@
 package com.rhythmix.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,10 +11,16 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
+    private final String frontendUrl;
+
+    public CorsConfig(@Value("${frontend.url:http://localhost:5173}") String frontendUrl) {
+        this.frontendUrl = frontendUrl;
+    }
+
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:5173");
+        corsConfig.addAllowedOrigin(frontendUrl);
         corsConfig.addAllowedHeader("*");
         corsConfig.setAllowCredentials(true);
         corsConfig.addAllowedMethod(HttpMethod.GET);
