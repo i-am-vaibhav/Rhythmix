@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         this.userServiceBaseUrl = userServiceBaseUrl;
     }
 
-    public UserRegResponse createUser(UserRequest request) throws Exception {
+    public UserRegResponse createUser(UserRequest request) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(userServiceBaseUrl)
                 .path("/users")
@@ -107,6 +107,5 @@ public class UserServiceImpl implements UserService {
         }
         return response.getBody();
     }
-
 
 }

@@ -5,7 +5,7 @@ import com.rhythmix.auth_service.dto.UserRequest;
 import com.rhythmix.auth_service.dto.UserRegResponse;
 
 public interface UserService {
-    UserRegResponse createUser(UserRequest request) throws Exception;
+    UserRegResponse createUser(UserRequest request);
 
-    UserAuthResponse getUser(String username) throws Exception;
+    UserAuthResponse getUser(String username);
 }
