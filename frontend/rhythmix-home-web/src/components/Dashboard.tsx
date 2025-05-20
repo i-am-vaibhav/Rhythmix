@@ -18,6 +18,7 @@ import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
 import { getRecentlyPlayedSongs, getSongs, getSongsByPreference } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
+import { MdRefresh } from 'react-icons/md';
 
 export interface Playlist {
   coverArt:string,
@@ -202,7 +203,7 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader,
         {showRefresh && <div className="d-flex ms-auto">
           <Button
             variant="primary"
-            className="shadow-lg mb-4" onClick={refresh}>  </Button>
+            className="shadow-lg mb-4" onClick={refresh}> <MdRefresh></MdRefresh> </Button>
         </div>}
       </div>
       <Row
