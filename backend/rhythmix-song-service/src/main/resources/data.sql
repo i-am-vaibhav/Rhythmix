@@ -1,5 +1,5 @@
 -- --------------------------------------------------
--- 1) Seed the `song` table with 7 tracks
+-- 1) Seed the `song` table with 49 tracks
 -- --------------------------------------------------
 INSERT INTO song (id, url, album, genre, language, artist, title, cover_art, created_at) VALUES
   (1,
@@ -343,7 +343,7 @@ NOW()
 NOW()
 ),
 (35,
-'hhttps://pagalall.com/wp-content/uploads/all/Mukhtasar%20Teri%20Meri%20Kahaani%20(pagalall.com).mp3',
+'https://pagalall.com/wp-content/uploads/all/Mukhtasar%20Teri%20Meri%20Kahaani%20(pagalall.com).mp3',
 'Teri Meri Kahaani',
 'Bollywood,Love,Party',
 'Hindi',
@@ -450,6 +450,46 @@ NOW()
 'Mohammed Irfan, Antara Mitra',
 'Sun Soniye',
 'https://pagalall.com/wp-content/uploads/Sun-Soniye-Ajab-Gazabb-Love-pagalall.com_.jpg',
+NOW()
+),
+(46,
+'https://hindi2.djpunjab.app/load-hindi/cL3zdvcMsb0NMALorp-XXw==/Sanson%20Ki%20Maala%20Pe.mp3',
+'Saanson Ki Mala',
+'Qawwali',
+'Hindi',
+'Ustad Nusrat Fateh Ali Khan',
+'Saanson Ki Mala',
+'https://pagalall.com/wp-content/uploads/Tumhein-Dillagi-Bhool-Jani-Paray-Gi-Nusrat-Fateh-Ali-Khan-pagalall.com_.jpg',
+NOW()
+),
+(47,
+'https://pagalfree.com/download/128-Finding%20Her%20-%20Kushagra%20128%20Kbps.mp3',
+'Finding Her',
+'Love,Romantic',
+'Hindi',
+'Kushagra',
+'Finding Her',
+'https://pagalfree.com/images/128Finding Her - Kushagra 128 Kbps.jpg',
+NOW()
+),
+(48,
+'https://hindi2.djpunjab.app/load/aNUxPKsgXmLoghClKXNuxA==/Ye%20Jo%20Halka%20Halka%20Saroor.mp3',
+'Ye Jo Halka Halka Saroor',
+'Qawwali',
+'Hindi',
+'Ustad Nusrat Fateh Ali Khan',
+'Ye Jo Halka Halka Saroor',
+'https://pagalall.com/wp-content/uploads/Tumhein-Dillagi-Bhool-Jani-Paray-Gi-Nusrat-Fateh-Ali-Khan-pagalall.com_.jpg',
+NOW()
+),
+(49,
+'https://hindi2.djpunjab.app/load/XsP5_35pNygjASZl947c4A==/Labon%20Ko.mp3',
+'Bhool Bhulaiyaa',
+'Love,Romantic',
+'Hindi',
+'K.K',
+'Labon Ko',
+'https://raag.fm/image/250/1022427/Bhool_Bhulaiyaa_KK.jpg',
 NOW()
 );
 -- --------------------------------------------------

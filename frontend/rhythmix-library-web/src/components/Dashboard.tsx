@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, InputGroup, ButtonGroup, Spinner, ListGroup } from 'react-bootstrap';
 import { FaSearch, FaPlay } from 'react-icons/fa';
 import FooterMusicPlayer from './FooterMusicPlayer';
 import trackList from "container/MockedMusic";
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { MdLibraryMusic } from 'react-icons/md';
+import { MdLibraryMusic, MdRefresh } from 'react-icons/md';
 import { FaPlus } from 'react-icons/fa6';
+import type { SongMetadata } from '../model';
+import { getRecentlyPlayedSongs } from 'container/backendService';
 
 const mockTracks = [ 
   ...trackList
@@ -45,6 +47,44 @@ const Dashboard = () => {
       addSongToQueue(track);
     });
   }
+
+  const [recent, setRecent] = useState([]);
+  const [recentLoading,setRecentLoading] = useState(false);
+
+  const fetchRecentlyPlayedSongs = async () => {
+    setRecentLoading(true);
+    try {
+      const response = await getRecentlyPlayedSongs();
+      if (response.status === 200) {
+        const songs = response.data;
+        const newSongs:SongMetadata[]  = [];
+        songs.forEach((song: SongMetadata) => {
+          newSongs.push(song);
+        });
+        const isChanged: boolean = JSON.stringify(songs.map((s: SongMetadata) => s.id)) !== JSON.stringify(recent.map((s: SongMetadata) => s.id));
+        if (isChanged) {
+          setRecent(songs);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recently played songs:', error);
+    }finally {
+      setRecentLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (document.visibilityState === 'visible') {
+      fetchRecentlyPlayedSongs();
+    }
+  }, []);
+
+  const spinner = (
+    <Col xs={12} className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+      <Spinner animation="border" role="status" variant="primary" />
+      <span className="visually-hidden">Loading...</span>
+    </Col>
+  );
 
   return (
     <Container fluid className="p-4 mb-5">
@@ -198,11 +238,16 @@ const Dashboard = () => {
           )}
 
           {/* Recently Played */}
-          <h2 className="mt-5 mb-3 text-light border-secondary border-bottom pb-2">
-            Recently Played
-          </h2>
-          <Row xs={2} sm={3} md={4} lg={4} className="g-3">
-            {mockTracks.slice(0, 4).map((item) => (
+          <div className="d-flex mt-5 mb-3 text-light border-secondary border-bottom pb-2">
+            <h4 className="fw-bold mb-0">Recently Played</h4>
+            <div className="d-flex ms-auto">
+              <Button
+                variant="primary"
+                className="shadow-lg mb-4" onClick={fetchRecentlyPlayedSongs}> <MdRefresh /> </Button>
+            </div>
+          </div>
+          <Row xs={2} sm={3} md={4} lg={5} className="g-3">
+            {recentLoading ? spinner : recent.map((item:SongMetadata) => (
               <Col key={item.id} className="d-flex">
                 <Card className="music-card h-100 border-0 shadow-sm">
                   <div className="position-relative image-container">

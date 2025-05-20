@@ -48,3 +48,21 @@ declare module 'container/MockedMusic' {
   const trackList: SongMetadata[];
   export default trackList;
 }
+
+declare module 'container/backendService' {
+  export interface ServerResponse {
+    status: number;
+    data: any;
+  }
+
+  export declare const getSongs: (keyword: string) => Promise<ServerResponse>;
+
+  export declare const getRecentlyPlayedSongs: () => Promise<ServerResponse>;
+
+  export declare const auditSong : (songId: string) => Promise<ServerResponse>;
+
+  export declare const getSongsByPreference : (preferenceType:string) => Promise<ServerResponse>;
+
+  export declare const getUser: () => any;
+
+}

@@ -45,8 +45,6 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const duration = getCurrentSongDuration();
   const [showQueue, setShowQueue] = useState(false);
-  const [shuffle, setShuffle] = useState(isShuffling);
-  const [repeat, setRepeat] = useState(isRepeating);
   const navigate = useNavigate();
 
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,10 +124,9 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             </div>
           </Col>
           <Col md={2} className="d-flex align-items-center justify-content-center gap-2">
-            <Button disabled={queue.length==0} variant={shuffle ? 'primary' : 'outline-light'} onClick={() => {
-              setShuffle(!shuffle);
+            <Button disabled={queue.length==0} variant={isShuffling ? 'primary' : 'outline-light'} onClick={() => {
               toggleShuffle();
-            }} className={styles['btn-rounded-circle']}>
+            }} className={isShuffling ? styles['btn-rounded-circle bg-success'] : styles['btn-rounded-circle']} >
               <FaShuffle />
             </Button>
             <Button disabled={queue.length==0 || currentTrackIndex == 0}  onClick={() => playPreviousTrack()} className={styles['btn-rounded-circle']}>
@@ -141,10 +138,9 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             <Button disabled={queue.length == currentTrackIndex+1}  onClick={() => playNextTrack()} className={styles['btn-rounded-circle']}>
               <FaForward/>
             </Button>
-            <Button disabled={queue.length==0} variant={repeat ? 'primary' : 'outline-light'} onClick={() => {
+            <Button disabled={queue.length==0} variant={isRepeating ? 'primary' : 'outline-light'} onClick={() => {
               toggleRepeat();
-              setRepeat(!repeat);
-            }} className={styles['btn-rounded-circle']}>
+            }} className={isRepeating ? styles['btn-rounded-circle bg-success'] : styles['btn-rounded-circle']} >
               <FaRepeat />
             </Button>
           </Col>

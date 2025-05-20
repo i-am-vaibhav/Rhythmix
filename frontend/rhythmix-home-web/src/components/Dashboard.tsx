@@ -199,7 +199,7 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader,
   return (
     <section className="mb-5">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold mb-0">{title}</h5>
+        <h4 className="fw-bold mb-0">{title}</h4>
         {showRefresh && <div className="d-flex ms-auto">
           <Button
             variant="primary"
