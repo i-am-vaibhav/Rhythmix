@@ -23,7 +23,7 @@ public class SongAudit {
     private BigDecimal id;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
-    @JoinColumn(name = "song_id", unique=true, nullable=false, updatable=false)
+    @JoinColumn(name = "song_id", nullable=false, updatable=false)
     private Song song;
 
     private String userName;
