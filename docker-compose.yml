@@ -154,6 +154,7 @@ services:
       - rhythmix_auth_service_url=http://rhythmix-auth-service:8100
       - rhythmix_user_service_url=http://rhythmix-user-services:8080
       - rhythmix_song_service_url=http://rhythmix-song-service:8200
+      - AUTH_SERVICE_BASE_URL=http://rhythmix-auth-service:8100/auth
       - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
       - SPRING_PROFILES_ACTIVE=dev
       - FRONTEND_URL=http://localhost:5173

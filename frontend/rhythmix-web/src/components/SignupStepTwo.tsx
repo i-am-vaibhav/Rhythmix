@@ -16,47 +16,15 @@ import { useAuthStore } from '../store/authStore';
 
 const options = {
   genres: [
-    'Pop',
-    'Rock',
-    'Hip-Hop',
-    'Rap',
-    'R&B',
-    'EDM',
-    'House',
-    'Techno',
-    'Trance',
-    'Jazz',
-    'Blues',
-    'Country',
-    'Bollywood',
-    'IndiPop',
-    'Hindustani Classical',
-    'Carnatic Classical',
-    'Ghazal',
-    'Qawwali',
-    'Sufi',
-    'Bhajan',
-    'Folk',
-    'Bhangra',
-    'Filmi (Indian Film Music)'
+    "Bollywood", "Soundtrack", "Love", "Party", "Dance", "Film", "Hip-Hop", "Rap", "PunjabiPop", "Qawwali", "Romantic", "Soft", "Rock"
   ],
 
   languages: [
-    'Hindi', 'English', 'Tamil', 'Telugu', 'Punjabi', 'Bengali', 'Marathi',
-    'Kannada', 'Malayalam', 'Gujarati', 'Odia', 'Assamese',
-    'Bhojpuri', 'Rajasthani'
+    'Hindi', 'Bhojpuri', 'Bihari', 'Marathi', 'Punjabi', 'English'
   ],
 
   artists: [
-    // International
-    'Taylor Swift', 'Adele', 'Drake', 'BTS', 'Ed Sheeran', 'Billie Eilish',
-    'The Weeknd', 'Bruno Mars', 'Dua Lipa', 'Coldplay',
-    // Indian
-    'Arijit Singh', 'Shreya Ghoshal', 'A. R. Rahman', 'Neha Kakkar',
-    'Sonu Nigam', 'Sunidhi Chauhan', 'Badshah', 'Honey Singh',
-    'Lata Mangeshkar', 'Kishore Kumar',
-    // Legends & Icons
-    'Michael Jackson', 'Elvis Presley', 'Madonna', 'Queen', 'Bob Marley'
+    "99side", "Ali Azmat", "Arijit Singh", "Amar Jalal", "Arif Lohar", "Harshdeep Kaur", "Diljit Dosanjh", "Sia", "Greg Kurstin", "Himesh Reshammiya", "Shreya Ghoshal", "Yo Yo Honey Singh", "Hamsika Iyer", "Imtiaz Ali", "Sajid Ali", "K.K", "Kushal Grumpy", "Little Bhatia", "Mika Singh", "Mohammed Irfan", "Gajendra Verma", "Mohit Chauhan", "Neeti Mohan", "Salim Merchant", "Shekhar Ravjiani", "Paradox", "Pho", "Piyush Mishra", "Rabbi Shergill", "Rahat Fateh Ali Khan", "Raghav Chaitanya", "Shafqat Amanat Ali", "Sonu Nigam", "Meet Bros", "Ustad Nusrat Fateh Ali Khan", "Vikas Bhalla", "Aman Trikha", "Vishal Dadlani", "Wajid", "Neha Kakkar"
   ]
 };
 
