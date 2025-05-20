@@ -128,8 +128,8 @@ const Dashboard: React.FC = () => {
           <InputGroup style={{ maxWidth: 300 }}>
             <InputGroup.Text><FaSearch /></InputGroup.Text>
             <FormControl
-              placeholder="Search music"
-              aria-label="Search music"
+              placeholder="Search music, artist, album..."
+              aria-label="Search music, artist, album..."
               value={searchKeyword}
               onChange={e => setSearchKeyword(e.target.value)}
             />
