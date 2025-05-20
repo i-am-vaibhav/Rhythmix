@@ -6,7 +6,8 @@ import {
   InputGroup,
   Spinner,
   Placeholder,
-  Container
+  Container,
+  ProgressBar
 } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaLock, FaMobileAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -133,7 +134,9 @@ const SignupStepOne: React.FC = () => {
           style={{ maxWidth: 400 }}
           noValidate
         >
-          <h3 className="mb-4 text-center fw-bold fs-4">Sign Up – Step 1</h3>
+
+          <h3 className="mb-4 text-center fw-bold fs-4">Sign Up - User Details</h3>
+          <ProgressBar now={33} label="Step 1 of 2" className="mb-4" variant="danger" />
 
           {renderInput('userName', 'text', 'Username', <FaUser />)}
           {renderInput('email', 'email', 'Email', <FaEnvelope />)}

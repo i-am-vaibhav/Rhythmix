@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 import { Howl, Howler } from 'howler';
+import { auditSong } from './backendService';
 
 export interface LyricsLine {
   time: number;
@@ -68,6 +69,9 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
       howl.play();
       set({ player: howl, isPlaying: true, currentTrackIndex: index });
       console.log(`Playing: ${song.title} by ${song.artist}`);
+      if (song.id) {
+        auditSong(song.id);
+      }
     }
   };
 

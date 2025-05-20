@@ -78,8 +78,8 @@ const PlayQueue: React.FC<{ show: boolean; onHide: () => void }> = ({ show, onHi
               {upcoming.map((t, idx) => (
                 <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center music-card">
                   <div>
-                    <strong>{t.title}</strong>
-                    {t.artist && <div className="text-muted small">{t.artist}</div>}
+                    <strong className='text-wrap'>{t.title}</strong>
+                    {t.artist && <div className="text-muted small text-wrap">{t.artist}</div>}
                   </div>
                   <div>
                     <Button size="sm" variant="outline-light" className="me-2"

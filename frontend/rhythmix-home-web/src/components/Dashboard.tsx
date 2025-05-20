@@ -16,7 +16,7 @@ import {
 import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { auditSong, getRecentlyPlayedSongs, getSongs, getSongsByPreference } from 'container/backendService';
+import { getRecentlyPlayedSongs, getSongs, getSongsByPreference } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
 
 export interface Playlist {
@@ -45,8 +45,10 @@ const Dashboard: React.FC = () => {
         songs.forEach((song: SongMetadata) => {
           newSongs.push(song);
         });
-        setRecent(newSongs);
-        setRecentLoading(false);
+        const isChanged: boolean = JSON.stringify(songs.map((s: SongMetadata) => s.id)) !== JSON.stringify(recent.map((s: SongMetadata) => s.id));
+        if (isChanged) {
+          setRecent(songs);
+        }
       }
     } catch (error) {
       console.error('Error fetching recently played songs:', error);
@@ -56,9 +58,10 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    const intervalId = setInterval(fetchRecentlyPlayedSongs, 5000);
-    return () => clearInterval(intervalId);
-  }, []); 
+    if (document.visibilityState === 'visible') {
+      fetchRecentlyPlayedSongs();
+    }
+  }, []);
 
   useEffect(() => {
     const types: string[] = ['ARTIST','LANGUAGE','GENRE'];
@@ -145,8 +148,8 @@ const Dashboard: React.FC = () => {
           />
         )}
         {/* Sections */}
-        <Section title="Recommended Playlists" playlist={recommended} grid loader={recommendedLoading}/>
-        <Section title="Recently Played" items={recent} grid loader={recentLoading}/>
+        <Section title="Recommended Playlists" playlist={recommended} grid loader={recommendedLoading} />
+        <Section title="Recently Played" items={recent} grid loader={recentLoading} showRefresh refresh={fetchRecentlyPlayedSongs} />
       </Container>
       <Row>
         <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
@@ -161,9 +164,11 @@ interface SectionProps {
   playlist?: Playlist[];
   grid?: boolean;
   loader: boolean;
+  showRefresh?: boolean;
+  refresh?: () => void;
 }
 
-const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader }) => {
+const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader, showRefresh, refresh }) => {
   const addSongToQueue = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.addSongToQueue
   );
@@ -177,41 +182,28 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader 
     (state: UseMusicPlayerStore) => state.stop
   );
 
-  async function handleAddToQueue(item: SongMetadata): Promise<void> {
-    if (item.id) {
-      await auditSong(item.id);
-    }
-    addSongToQueue(item);
-  }
-
   const playPlayList = async (songs: SongMetadata[]) => {
     for (const track of songs) {
-      await handleAddToQueue(track);
+      addSongToQueue(track);
     }
   }
 
   const spinner = (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',  // semi-transparent black
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: '0.5rem',                // match your cards’ rounding if needed
-        zIndex: 10,
-      }}
-    >
-      <Spinner animation="border" role="status" variant="light" />
+    <Col xs={12} className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+      <Spinner animation="border" role="status" variant="primary" />
       <span className="visually-hidden">Loading...</span>
-    </div>
+    </Col>
   );
 
   return (
     <section className="mb-5">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="fw-bold mb-0">{title}</h5>
+        {showRefresh && <div className="d-flex ms-auto">
+          <Button
+            variant="primary"
+            className="shadow-lg mb-4" onClick={refresh}>  </Button>
+        </div>}
       </div>
       <Row
         className={
@@ -228,7 +220,7 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader 
                 <Card.Img
                   src={item.coverArt}
                   alt={item.title}
-                  className="rounded-top"
+                  className="rounded-top fade-in"
                   style={{objectFit:'cover'}}
                 />
                 <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
@@ -245,7 +237,7 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader 
                     <Button
                       variant="light"
                       className="rounded-circle p-3 m-4 shadow-lg"
-                      onClick={() => handleAddToQueue(item)}
+                      onClick={() => addSongToQueue(item)}
                     >
                       <FaPlus />
                     </Button>
@@ -263,14 +255,14 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader 
             </Card>
           </Col>
         ))}
-        {!loader && playlist && playlist.length > 0 && playlist?.map((item,index) => (
+        {!loader && playlist && playlist.length > 0 && playlist.map((item,index) => (
           <Col key={index} className="d-flex">
             <Card className="music-card h-100 border-0 shadow-sm">
               <div className="position-relative image-container">
                 <Card.Img
                   src={item.coverArt}
                   alt={item.title}
-                  className="rounded-top"
+                  className="rounded-top fade-in"
                   style={{objectFit:'cover'}}
                 />
                 <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">

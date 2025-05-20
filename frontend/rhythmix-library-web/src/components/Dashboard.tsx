@@ -116,7 +116,7 @@ const Dashboard = () => {
                         <Card.Img
                           src={item.coverArt}
                           alt={item.title}
-                          className="rounded-top"
+                          className="rounded-top fade-in"
                           style={{objectFit:'cover'}}
                         />
                         <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
@@ -167,7 +167,7 @@ const Dashboard = () => {
                     <img
                       src={track.coverArt}
                       alt={track.title}
-                      className="rounded me-3"
+                      className="rounded me-3 fade-in"
                       style={{ width: 60, height: 60, objectFit: 'cover' }}
                     />
                     <div>
@@ -209,7 +209,7 @@ const Dashboard = () => {
                     <Card.Img
                       src={item.coverArt}
                       alt={item.title}
-                      className="rounded-top"
+                      className="rounded-top fade-in"
                       style={{objectFit:'cover'}}
                     />
                     <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">

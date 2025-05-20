@@ -103,10 +103,9 @@ const SignupStepTwo: React.FC = () => {
           style={{ maxWidth: 500 }}
           noValidate
         >
-          <ProgressBar now={100} label="Step 2 of 2" className="mb-4" variant="danger" />
-
-          <h3 className="mb-4 text-center fw-bold fs-4">Your Preferences</h3>
-
+          <h3 className="mb-4 text-center fw-bold fs-4">Sign Up - User Preferences</h3>
+          <ProgressBar now={70} label="Step 2 of 2" className="mb-4" variant="danger" />
+          
           {(Object.keys(options) as Array<keyof typeof options>).map(field => (
             <Form.Group className="mb-4" key={field}>
               <div className="d-flex justify-content-between align-items-center mb-2">

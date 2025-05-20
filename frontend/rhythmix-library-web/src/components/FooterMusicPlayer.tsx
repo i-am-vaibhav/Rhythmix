@@ -109,7 +109,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
       <div className={styles['footer-inner-container']}>
         <Row className="align-items-center w-100">
           <Col md={3} className="d-flex align-items-center">
-            <img src={songMetadata.coverArt} alt="Cover" className={`${styles['card-img']} me-3`} />
+            <img src={songMetadata.coverArt} alt="Cover" className={`${styles['card-img']} me-3 fade-in`} />
             <div>
               <div className={styles['card-title']}>{songMetadata.title}</div>
               <div className={styles['card-text']}>{songMetadata.artist}</div>
