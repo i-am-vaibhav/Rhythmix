@@ -2,9 +2,22 @@ declare module 'container/AuthStore' {
   export const useAuthStore: any;
 }
 
-declare module 'container/MockedMusic' {
-  const trackList: SongMetadata[];
-  export default trackList;
+declare module 'container/backendService' {
+  export interface ServerResponse {
+    status: number;
+    data: any;
+  }
+
+  export declare const getSongs: (page: number, limit: number) => Promise<ServerResponse>;
+
+  export declare const getRecentlyPlayedSongs: (page: number, limit: number) => Promise<ServerResponse>;
+
+  export declare const auditSong : (songId: string) => Promise<ServerResponse>;
+
+  export declare const getSongsByPreference : (preferenceType:string) => Promise<ServerResponse>;
+
+  export declare const getUser: () => any;
+
 }
 
 declare module 'container/musicPlayer' {

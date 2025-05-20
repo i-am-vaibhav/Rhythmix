@@ -12,6 +12,7 @@ import {
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useSignupStore } from '../store/signupStore';
+import { useAuthStore } from '../store/authStore';
 
 const options = {
   genres: [
@@ -101,9 +102,14 @@ const SignupStepTwo: React.FC = () => {
     setSubmitting(true);
     const response = await registerUser();
     setSubmitting(false);
-    if (response) {
+    if (response.status == 201) {
       resetForm();
-      navigate('/login');
+      useAuthStore.setState({
+        isAuthenticated: true,
+        userData: response.data.userData,
+        message: '' 
+      });
+      navigate('/home/dashboard');
     }
   };
 

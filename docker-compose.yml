@@ -36,6 +36,8 @@ services:
     depends_on:
       - rhythmix-home-web
       - rhythmix-library-web
+      - rhythmix-player-web
+      - rhythmix-config-server
     build:
       context: ./frontend/rhythmix-web
       dockerfile: Dockerfile
@@ -73,7 +75,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 15s
 
   rhythmix-auth-service:
     container_name: rhythmix-auth-service

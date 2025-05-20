@@ -55,9 +55,9 @@ public interface SongRepository extends JpaRepository<Song, BigDecimal> {
     )
     Page<Song> findLikedSongs(Pageable pageable);
 
-    Page<Song> findByGenreContainingIgnoreCase(String genre, Pageable pageable);
+    List<Song> findByGenreContainingIgnoreCase(String genre);
 
-    Page<Song> findByLanguageContainingIgnoreCase(String language, Pageable pageable);
+    List<Song> findByLanguageContainingIgnoreCase(String language);
 
-    Page<Song> findByArtistIn(List<String> artists, Pageable pageable);
+    List<Song> findByArtistContainingIgnoreCase(String artist);
 }

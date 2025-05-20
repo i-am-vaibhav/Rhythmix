@@ -19,13 +19,14 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SongAudit {
     @Id
+    @GeneratedValue
     private BigDecimal id;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, optional = false)
     @JoinColumn(name = "song_id", unique=true, nullable=false, updatable=false)
     private Song song;
 
-    private UUID userId;
+    private String userName;
 
     @CreationTimestamp
     private Instant createdAt;

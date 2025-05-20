@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/songs")
@@ -43,23 +43,21 @@ public class SongController {
     }
 
     @GetMapping("/{preferenceType}/{preference}")
-    public ResponseEntity<Page<Song>> songsByPreference(
+    public ResponseEntity<Map<String,List<Song>>> songsByPreference(
             @PathVariable(name = "preferenceType") PreferenceType preferenceType,
-            @PathVariable(name = "preference") String preference,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
-            @RequestParam(required = false, defaultValue = "0") int page
+            @PathVariable(name = "preference") String preference
     ) {
         return ResponseEntity.ok(
-                songService.getSongsByPreferences(preference, preferenceType, page, pageSize)
+                songService.getSongsByPreferences(preference, preferenceType)
         );
     }
 
-    @GetMapping("/recently-played/{userId}")
+    @GetMapping("/recently-played/{userName}")
     public ResponseEntity<List<Song>> recentlyPlayedSongs(
-            @PathVariable(name = "userId") UUID userId
+            @PathVariable(name = "userName") String userName
             ){
         return ResponseEntity.ok(
-                songService.getRecentlyPlayedSongs(userId)
+                songService.getRecentlyPlayedSongs(userName)
         );
     }
 

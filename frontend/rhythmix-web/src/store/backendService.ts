@@ -10,6 +10,24 @@ export interface ServerResponse {
   data: any
 }
 
+const getToken = () => {
+  const token = localStorage.getItem('userToken');
+  if (token) {
+    const parsedToken = JSON.parse(token);
+    return parsedToken.token;
+  }
+  return null;
+};
+
+export const getUser = () => {
+  const token = localStorage.getItem('userToken');
+  if (token) {
+    const parsedToken = JSON.parse(token);
+    return parsedToken.userData;
+  }
+  return null;
+};
+
 // Login API call
 export const login = async ({ userName, password }: LoginRequest) => {
   try {
@@ -33,11 +51,11 @@ export const register = async ({userName, email, password, mobile, genres, langu
       userName,
       email,
       password,
-      mobile,
-      preferences:{
-        genres: genres.join(","),
-        languages: languages.join(","),
-        artists: artists.join(",")
+      phone: mobile,
+      metadata:{
+        preferredGenre: genres.join(","),
+        preferredLanguage: languages.join(","),
+        preferredArtist: artists.join(",")
       }
     });
     return { status: response.status, data: response.data };
@@ -47,4 +65,83 @@ export const register = async ({userName, email, password, mobile, genres, langu
     }
     return { status: 500, data: { message: 'An unknown error occurred' } };
   }
+};
+
+// Get Songs API call
+export const getSongs = async (page: number, limit: number) => {  
+  try {
+    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs`, {
+      params: { page, limit },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      }
+    });
+    return { status: response.status, data: response.data };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+    return { status: 500, data: { message: 'An unknown error occurred' } };
+  }
+};
+
+// Get Recently Played Songs API call
+export const getRecentlyPlayedSongs = async (page: number, limit: number): Promise<ServerResponse> => {
+  try {
+    const userName = getUser().userName;
+    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/recently-played/${userName}`, {
+      params: { page, limit },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      }
+    });
+    return { status: response.status, data: response.data };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+    return { status: 500, data: { message: 'An unknown error occurred' } };
+  }
+}
+
+// Send Audit Log for a Song Play
+export const auditSong = async (songId: string): Promise<ServerResponse> => {
+  try {
+    const userName = getUser().userName;
+    await axios.post(`${API_BASE_URL}/songs/audit`, {
+      userName: userName,
+      songId: songId
+    }, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    return { status: 200, data: { message: 'Audit log sent successfully' } };
+  } catch (error) {
+    console.error('Error auditing song:', error);
+    return { status: 500, data: { message: 'An unknown error occurred' } };
+  }
+};
+
+// Get Song By Preferences
+const capitalizeFirst = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+export const getSongsByPreference = async (
+  preferenceType: 'GENRE' | 'LANGUAGE' | 'ARTIST'
+): Promise<ServerResponse> => {
+  const preferenceTypeCapitalized = capitalizeFirst(preferenceType);
+  const preference = getUser().metadata[`preferred${preferenceTypeCapitalized}`];
+  try {
+    const url = `${API_BASE_URL}/songs/${preferenceType}/${encodeURIComponent(preference)}`;
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    });
+  return { status: 200, data: response.data };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
 };
