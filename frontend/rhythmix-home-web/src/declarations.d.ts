@@ -10,7 +10,7 @@ declare module 'container/backendService' {
 
   export declare const getSongs: (page: number, limit: number) => Promise<ServerResponse>;
 
-  export declare const getRecentlyPlayedSongs: (page: number, limit: number) => Promise<ServerResponse>;
+  export declare const getRecentlyPlayedSongs: () => Promise<ServerResponse>;
 
   export declare const auditSong : (songId: string) => Promise<ServerResponse>;
 

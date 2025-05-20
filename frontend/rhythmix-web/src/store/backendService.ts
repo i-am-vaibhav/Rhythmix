@@ -74,6 +74,7 @@ export const getSongs = async (page: number, limit: number) => {
       params: { page, limit },
       headers: {
         Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
       }
     });
     return { status: response.status, data: response.data };
@@ -86,13 +87,13 @@ export const getSongs = async (page: number, limit: number) => {
 };
 
 // Get Recently Played Songs API call
-export const getRecentlyPlayedSongs = async (page: number, limit: number): Promise<ServerResponse> => {
+export const getRecentlyPlayedSongs = async (): Promise<ServerResponse> => {
   try {
     const userName = getUser().userName;
     const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/recently-played/${userName}`, {
-      params: { page, limit },
       headers: {
         Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
       }
     });
     return { status: response.status, data: response.data };
@@ -113,7 +114,8 @@ export const auditSong = async (songId: string): Promise<ServerResponse> => {
       songId: songId
     }, {
       headers: {
-        Authorization: `Bearer ${getToken()}`
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
       }
     });
     return { status: 200, data: { message: 'Audit log sent successfully' } };
@@ -135,7 +137,9 @@ export const getSongsByPreference = async (
   try {
     const url = `${API_BASE_URL}/songs/${preferenceType}/${encodeURIComponent(preference)}`;
     const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${getToken()}` }
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName, }
     });
   return { status: 200, data: response.data };
   } catch (error) {

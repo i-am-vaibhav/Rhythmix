@@ -34,10 +34,14 @@ services:
   rhythmix-web:
     container_name: rhythmix-web
     depends_on:
-      - rhythmix-home-web
-      - rhythmix-library-web
-      - rhythmix-player-web
-      - rhythmix-config-server
+      rhythmix-home-web:
+        condition: service_started
+      rhythmix-library-web:
+        condition: service_started
+      rhythmix-player-web:
+        condition: service_started
+      rhythmix-config-server:
+        condition: service_healthy
     build:
       context: ./frontend/rhythmix-web
       dockerfile: Dockerfile

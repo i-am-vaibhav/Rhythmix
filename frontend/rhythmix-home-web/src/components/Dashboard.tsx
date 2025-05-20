@@ -33,96 +33,47 @@ const Dashboard: React.FC = () => {
 
   const capitalizeFirst = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-  useEffect(() => {
-    const fetchRecentlyPlayedSongs = async () => {
-      const response = await getRecentlyPlayedSongs(0,10);
-      if (response.status === 200) {
-        const songs = response.data?.content;
-        if (Array.isArray(songs) && songs.length > 0) {
-          console.log(songs);
-          songs.forEach((song: SongMetadata) => {
-            setRecent((prev) => [...prev, song]);
-          });
-        }
-      }
-    };
-    fetchRecentlyPlayedSongs();
-  }, []);
+  const fetchRecentlyPlayedSongs = async () => {
+    const response = await getRecentlyPlayedSongs();
+    if (response.status === 200) {
+      const songs = response.data;
+      const newSongs:SongMetadata[]  = [];
+      songs.forEach((song: SongMetadata) => {
+        newSongs.push(song);
+      });
+      setRecent(newSongs);
+    }
+  };
 
   useEffect(() => {
-    const fetchSongsByPreferenceArtist = async () => {
-      const response = await getSongsByPreference('ARTIST');
-      if (response.status === 200) {
-        const songs = response.data;
-        if (songs && typeof songs === 'object' && !Array.isArray(songs)) {
-          Object.entries(songs).forEach(([artist, artistSongs]) => {
-            if (Array.isArray(artistSongs) && artistSongs.length > 0) {
-              const randomIndex = Math.floor(Math.random() * artistSongs.length);
-              setRecommended(prev => [
-                ...prev,
-                {
-                  coverArt: artistSongs[randomIndex].coverArt,
-                  songs: artistSongs,
-                  title: `${capitalizeFirst(artist)} Mix`,
-                },
-              ]);
-            }
-          });
-        }
-      }
-    };
-    fetchSongsByPreferenceArtist();
-  }, []);
+    const intervalId = setInterval(fetchRecentlyPlayedSongs, 5000);
+    return () => clearInterval(intervalId);
+  }, []); 
 
   useEffect(() => {
-    const fetchSongsByPreferenceLanguage = async () => {
-      const response = await getSongsByPreference('LANGUAGE');
-      if (response.status === 200) {
-        const songs = response.data;
-        if (songs && typeof songs === 'object' && !Array.isArray(songs)) {
-          Object.entries(songs).forEach(([artist, artistSongs]) => {
-            if (Array.isArray(artistSongs) && artistSongs.length > 0) {
-              const randomIndex = Math.floor(Math.random() * artistSongs.length);
-              setRecommended(prev => [
-                ...prev,
-                {
-                  coverArt: artistSongs[randomIndex].coverArt,
-                  songs: artistSongs,
-                  title: `${capitalizeFirst(artist)} Mix`,
-                },
-              ]);
-            }
-          });
-        }
-      }
-    };
-    fetchSongsByPreferenceLanguage();
+    let mounted = true;
+    const types: string[] = ['ARTIST','LANGUAGE','GENRE'];
+    Promise.all(types.map(t => getSongsByPreference(t)))
+      .then(responses => {
+        if (!mounted) return;
+        const lists = responses.flatMap(r => {
+          if (r.status !== 200 || typeof r.data !== 'object') return [];
+          return Object.entries(r.data).map(([key, arr]) => {
+            if (!Array.isArray(arr) || arr.length === 0) return null;
+            const random = arr[Math.floor(Math.random()*arr.length)];
+            return {
+              title: `${capitalizeFirst(key)} Mix`,
+              coverArt: random.coverArt,
+              songs: arr as SongMetadata[],
+            };
+          }).filter(Boolean) as Playlist[];
+        });
+        setRecommended(lists);
+      })
+      .catch(console.error);
+    return () => { mounted = false };
   }, []);
 
-  useEffect(() => {
-    const fetchSongsByPreferenceGenre = async () => {
-      const response = await getSongsByPreference('GENRE');
-      if (response.status === 200) {
-        const songs = response.data;
-        if (songs && typeof songs === 'object' && !Array.isArray(songs)) {
-          Object.entries(songs).forEach(([genre, genreSongs]) => {
-            if (Array.isArray(genreSongs) && genreSongs.length > 0) {
-                const randomIndex = Math.floor(Math.random() * genreSongs.length);
-                setRecommended(prev => [
-                ...prev,
-                {
-                  coverArt: genreSongs[randomIndex].coverArt,
-                  songs: genreSongs,
-                  title: `${capitalizeFirst(genre)} Mix`,
-                },
-                ]);
-            }
-          });
-        }
-      }
-    };
-    fetchSongsByPreferenceGenre();
-  }, []);
 
 
   return (
@@ -193,7 +144,7 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid }) => {
             : 'flex-nowrap overflow-auto'
         }
       >
-        {items ? items?.map((item) => (
+        {items && items.length > 0 ? items.map((item) => (
           <Col key={item.id} className="d-flex">
             <Card className="music-card h-100 border-0 shadow-sm">
               <div className="position-relative image-container">

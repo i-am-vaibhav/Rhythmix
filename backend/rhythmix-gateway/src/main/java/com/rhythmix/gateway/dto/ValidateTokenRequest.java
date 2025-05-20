@@ -1,4 +1,7 @@
 package com.rhythmix.gateway.dto;
 
-public record ValidateTokenRequest() {
+import lombok.Builder;
+
+@Builder
+public record ValidateTokenRequest(String token, String userName) {
 }
