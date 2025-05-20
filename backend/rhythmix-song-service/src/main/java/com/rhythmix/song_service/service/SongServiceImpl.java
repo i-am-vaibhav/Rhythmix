@@ -8,6 +8,8 @@ import com.rhythmix.song_service.model.SongAudit;
 import com.rhythmix.song_service.repository.SongAuditRepository;
 import com.rhythmix.song_service.repository.SongRepository;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -70,8 +72,12 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Page<Song> getSongs(int page, int pageSize) {
-        return songRepository.findAll(PageRequest.of(page, pageSize))
+    public Page<Song> getSongs(String keyword, int page, int pageSize) {
+        Song song = Song.builder().album(keyword).artist(keyword).genre(keyword).title(keyword).build();
+        Example<com.rhythmix.song_service.model.Song> songExample = Example.of(songConverter.toEntity(song),
+                ExampleMatcher.matchingAny().withIgnoreNullValues().withIgnoreCase()
+                        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+        return songRepository.findAll(songExample,PageRequest.of(page, pageSize))
                 .map(songConverter::toDto);
     }
 

@@ -8,7 +8,7 @@ declare module 'container/backendService' {
     data: any;
   }
 
-  export declare const getSongs: (page: number, limit: number) => Promise<ServerResponse>;
+  export declare const getSongs: (keyword: string) => Promise<ServerResponse>;
 
   export declare const getRecentlyPlayedSongs: () => Promise<ServerResponse>;
 

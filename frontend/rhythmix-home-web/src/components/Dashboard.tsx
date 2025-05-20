@@ -11,11 +11,12 @@ import {
   InputGroup,
   FormControl,
   Button,
+  Spinner,
 } from 'react-bootstrap';
 import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { auditSong, getRecentlyPlayedSongs, getSongsByPreference } from 'container/backendService';
+import { auditSong, getRecentlyPlayedSongs, getSongs, getSongsByPreference } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
 
 export interface Playlist {
@@ -29,19 +30,28 @@ const Dashboard: React.FC = () => {
 
   const [recent, setRecent] = useState<SongMetadata[]>([]);
   const [recommended, setRecommended] = useState<Playlist[]>([]);
-
+  const [recentLoading,setRecentLoading] = useState(false);
+  const [recommendedLoading,setRecommendedLoading] = useState(false);
 
   const capitalizeFirst = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   const fetchRecentlyPlayedSongs = async () => {
-    const response = await getRecentlyPlayedSongs();
-    if (response.status === 200) {
-      const songs = response.data;
-      const newSongs:SongMetadata[]  = [];
-      songs.forEach((song: SongMetadata) => {
-        newSongs.push(song);
-      });
-      setRecent(newSongs);
+    setRecentLoading(true);
+    try {
+      const response = await getRecentlyPlayedSongs();
+      if (response.status === 200) {
+        const songs = response.data;
+        const newSongs:SongMetadata[]  = [];
+        songs.forEach((song: SongMetadata) => {
+          newSongs.push(song);
+        });
+        setRecent(newSongs);
+        setRecentLoading(false);
+      }
+    } catch (error) {
+      console.error('Error fetching recently played songs:', error);
+    }finally {
+      setRecentLoading(false);
     }
   };
 
@@ -51,11 +61,11 @@ const Dashboard: React.FC = () => {
   }, []); 
 
   useEffect(() => {
-    let mounted = true;
     const types: string[] = ['ARTIST','LANGUAGE','GENRE'];
+    setRecommendedLoading(true);
+    let mounted = true;
     Promise.all(types.map(t => getSongsByPreference(t)))
       .then(responses => {
-        if (!mounted) return;
         const lists = responses.flatMap(r => {
           if (r.status !== 200 || typeof r.data !== 'object') return [];
           return Object.entries(r.data).map(([key, arr]) => {
@@ -70,11 +80,44 @@ const Dashboard: React.FC = () => {
         });
         setRecommended(lists);
       })
-      .catch(console.error);
-    return () => { mounted = false };
+      .catch(err => {
+        console.error(err);
+      })
+      .finally(() => {
+        if (mounted) setRecommendedLoading(false);
+      });
+    return () => {mounted = false};
   }, []);
 
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchResults, setSearchResults] = useState<SongMetadata[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
+  // a little debounce timer
+  useEffect(() => {
+    if (!searchKeyword) {
+      setSearchResults([]);
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const { status, data } = await getSongs(searchKeyword);
+        if (status === 200 && Array.isArray(data.content)) {
+          setSearchResults(data.content);
+        } else {
+          setSearchResults([]);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(handle);
+  }, [searchKeyword]);
 
   return (
     <>
@@ -84,13 +127,26 @@ const Dashboard: React.FC = () => {
           <h3>Welcome back, {userData.userName}!</h3>
           <InputGroup style={{ maxWidth: 300 }}>
             <InputGroup.Text><FaSearch /></InputGroup.Text>
-            <FormControl placeholder="Search music" aria-label="Search music" />
+            <FormControl
+              placeholder="Search music"
+              aria-label="Search music"
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+            />
           </InputGroup>
         </div>
 
+        {searchKeyword && (
+          <Section
+            title={`Search: "${searchKeyword}"`}
+            items={searchResults}
+            grid
+            loader={searchLoading}
+          />
+        )}
         {/* Sections */}
-        <Section title="Recently Played" items={recent} grid />
-        <Section title="Recommended Playlists" playlist={recommended} grid />
+        <Section title="Recommended Playlists" playlist={recommended} grid loader={recommendedLoading}/>
+        <Section title="Recently Played" items={recent} grid loader={recentLoading}/>
       </Container>
       <Row>
         <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
@@ -104,9 +160,10 @@ interface SectionProps {
   items?: SongMetadata[];
   playlist?: Playlist[];
   grid?: boolean;
+  loader: boolean;
 }
 
-const Section: React.FC<SectionProps> = ({ title, items, playlist, grid }) => {
+const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader }) => {
   const addSongToQueue = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.addSongToQueue
   );
@@ -132,6 +189,25 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid }) => {
       await handleAddToQueue(track);
     }
   }
+
+  const spinner = (
+    <div
+      style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',  // semi-transparent black
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: '0.5rem',                // match your cards’ rounding if needed
+        zIndex: 10,
+      }}
+    >
+      <Spinner animation="border" role="status" variant="light" />
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  );
+
   return (
     <section className="mb-5">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -144,7 +220,8 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid }) => {
             : 'flex-nowrap overflow-auto'
         }
       >
-        {items && items.length > 0 ? items.map((item) => (
+          {loader && spinner}
+          {!loader && items && items.length>0 && items.map((item) => (
           <Col key={item.id} className="d-flex">
             <Card className="music-card h-100 border-0 shadow-sm">
               <div className="position-relative image-container">
@@ -185,8 +262,8 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid }) => {
               </div>
             </Card>
           </Col>
-        ))
-        : playlist?.map((item,index) => (
+        ))}
+        {!loader && playlist && playlist.length > 0 && playlist?.map((item,index) => (
           <Col key={index} className="d-flex">
             <Card className="music-card h-100 border-0 shadow-sm">
               <div className="position-relative image-container">

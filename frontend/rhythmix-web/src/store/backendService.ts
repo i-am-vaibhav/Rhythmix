@@ -68,10 +68,10 @@ export const register = async ({userName, email, password, mobile, genres, langu
 };
 
 // Get Songs API call
-export const getSongs = async (page: number, limit: number) => {  
+export const getSongs = async (keyword:string) => {  
   try {
-    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs`, {
-      params: { page, limit },
+    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/search/${encodeURIComponent(keyword)}`, {
+      params: { page:0, pageSize:10 },
       headers: {
         Authorization: `Bearer ${getToken()}`,
         AuthUsername: getUser().userName,

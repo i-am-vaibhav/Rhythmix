@@ -21,13 +21,14 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping
+    @GetMapping("/search/{keyword}")
     public ResponseEntity<Page<Song>> songs(
+            @PathVariable(name = "keyword") String keyword,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "0") int page
     ) {
         return ResponseEntity.ok(
-                songService.getSongs(page, pageSize)
+                songService.getSongs(keyword,page, pageSize)
         );
     }
 

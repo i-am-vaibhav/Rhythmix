@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface SongService {
 
@@ -16,7 +15,7 @@ public interface SongService {
 
     Map<String,List<Song>> getSongsByPreferences(String preference, PreferenceType preferenceType);
 
-    Page<Song> getSongs(int page, int pageSize);
+    Page<Song> getSongs(String keyword, int page, int pageSize);
 
     List<Song> getRecentlyPlayedSongs(String userName);
 
