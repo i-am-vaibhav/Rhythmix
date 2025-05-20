@@ -2,7 +2,6 @@
 using rhythmix_user_services.Models;
 
 namespace rhythmix_user_services.Data
-
 {
     public class AppDbContext : DbContext
     {
@@ -31,6 +30,17 @@ namespace rhythmix_user_services.Data
                 .WithOne(m => m.user)
                 .HasForeignKey<UserMetadata>(m => m.userId);
 
+            // UserLibrary timestamp defaults
+            modelBuilder.Entity<UserLibrary>(entity =>
+            {
+                entity.Property(e => e.createdAt)
+                      .HasDefaultValueSql("NOW()")
+                      .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.updatedAt)
+                      .HasDefaultValueSql("NOW()")
+                      .ValueGeneratedOnAddOrUpdate();
+            });
         }
     }
 }
