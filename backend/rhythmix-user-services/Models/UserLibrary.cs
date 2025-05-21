@@ -9,8 +9,7 @@ namespace rhythmix_user_services.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
-        [ForeignKey("userId")]
-        public Guid userId { get; set; }
+        public string userName { get; set; }
         public decimal songId { get; set; }
         public bool liked { get; set; }
         public string playlistName { get; set; }
