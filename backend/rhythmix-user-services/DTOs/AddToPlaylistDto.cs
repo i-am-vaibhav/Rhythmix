@@ -2,8 +2,8 @@
 {
     public class AddToPlaylistDto
     {
-        public Guid userId { get; set; }
+        public string userName { get; set; } = string.Empty;
         public decimal songId { get; set; }
-        public string PlaylistName { get; set; } = string.Empty;
+        public string playlistName { get; set; } = string.Empty;
     }
 }
