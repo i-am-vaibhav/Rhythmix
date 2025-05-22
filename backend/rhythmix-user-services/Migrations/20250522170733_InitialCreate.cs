@@ -33,10 +33,10 @@ namespace rhythmix_user_services.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    userId = table.Column<Guid>(type: "uuid", nullable: false),
+                    userName = table.Column<string>(type: "text", nullable: false),
                     songId = table.Column<decimal>(type: "numeric", nullable: false),
                     liked = table.Column<bool>(type: "boolean", nullable: false),
-                    playlistName = table.Column<string>(type: "text", nullable: false),
+                    playlistName = table.Column<string>(type: "text", nullable: true),
                     createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     UserDetailsuserId = table.Column<Guid>(type: "uuid", nullable: true)

@@ -72,7 +72,6 @@ namespace rhythmix_user_services.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("playlistName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("songId")

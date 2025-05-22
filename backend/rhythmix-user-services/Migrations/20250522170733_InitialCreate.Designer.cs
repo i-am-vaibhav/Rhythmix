@@ -12,7 +12,7 @@ using rhythmix_user_services.Data;
 namespace rhythmix_user_services.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250520212205_InitialCreate")]
+    [Migration("20250522170733_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -75,7 +75,6 @@ namespace rhythmix_user_services.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("playlistName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("songId")
@@ -86,8 +85,9 @@ namespace rhythmix_user_services.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid>("userId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("userName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("id");
 
