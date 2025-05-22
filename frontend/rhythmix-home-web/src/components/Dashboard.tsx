@@ -16,9 +16,10 @@ import {
 import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { getRecentlyPlayedSongs, getSongs, getSongsByPreference } from 'container/backendService';
+import { fetchLikedSongs, getRecentlyPlayedSongs, getSongs, getSongsByPreference, likeSong, unlikeSong } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
 import { MdRefresh } from 'react-icons/md';
+import { FaHeart } from 'react-icons/fa6';
 
 export interface Playlist {
   coverArt:string,
@@ -63,6 +64,44 @@ const Dashboard: React.FC = () => {
       fetchRecentlyPlayedSongs();
     }
   }, []);
+
+  const [likedSongIds, setLikedSongIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let mounted = true;
+    fetchLikedSongs()
+      .then((songIds: string[]) => {
+      if (mounted) setLikedSongIds(new Set<string>(songIds));
+      })
+      .catch((err: unknown) => {
+      console.error("Failed to fetch liked songs", err);
+      });
+    return () => { mounted = false };
+  }, []);
+
+  const isLiked = (songId?: string): boolean => !!songId && likedSongIds.has(songId);
+
+  const toggleLike = async (songId?: string) => {
+    if (!songId) return;
+
+    const updated = new Set(likedSongIds);
+    const alreadyLiked = updated.has(songId);
+
+    alreadyLiked ? updated.delete(songId) : updated.add(songId);
+    setLikedSongIds(new Set(updated));
+
+    try {
+      if (alreadyLiked) {
+        await unlikeSong(songId);
+      } else {
+        await likeSong(songId);
+      }
+    } catch (err) {
+      console.error("Like toggle failed", err);
+      alreadyLiked ? updated.add(songId) : updated.delete(songId);
+      setLikedSongIds(new Set(updated));
+    }
+  };
 
   useEffect(() => {
     const types: string[] = ['ARTIST','LANGUAGE','GENRE'];
@@ -146,11 +185,15 @@ const Dashboard: React.FC = () => {
             items={searchResults}
             grid
             loader={searchLoading}
+            isLiked={isLiked}
+            toggleLike={toggleLike}
           />
         )}
         {/* Sections */}
         <Section title="Recommended Playlists" playlist={recommended} grid loader={recommendedLoading} />
-        <Section title="Recently Played" items={recent} grid loader={recentLoading} showRefresh refresh={fetchRecentlyPlayedSongs} />
+        <Section title="Recently Played" items={recent} grid loader={recentLoading} showRefresh refresh={fetchRecentlyPlayedSongs} 
+            isLiked={isLiked}
+            toggleLike={toggleLike}/>
       </Container>
       <Row>
         <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
@@ -167,9 +210,11 @@ interface SectionProps {
   loader: boolean;
   showRefresh?: boolean;
   refresh?: () => void;
+  isLiked?: (songId?: string) => boolean;
+  toggleLike?: (songId?: string) => void;
 }
 
-const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader, showRefresh, refresh }) => {
+const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader, showRefresh, refresh, isLiked, toggleLike }) => {
   const addSongToQueue = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.addSongToQueue
   );
@@ -241,6 +286,12 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader,
                       onClick={() => addSongToQueue(item)}
                     >
                       <FaPlus />
+                    </Button>
+                    <Button
+                      variant="light"
+                      className={isLiked && isLiked(item.id) ? "rounded-circle p-3 m-4 shadow-lg bg-danger" : "rounded-circle p-3 m-4 shadow-lg"}
+                      onClick={() => toggleLike && toggleLike(item.id)}>
+                      <FaHeart />
                     </Button>
                   </div>
                   <div className="text-center d-flex flex-column justify-content-between">

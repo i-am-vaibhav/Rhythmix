@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import { FaPlay, FaPause, FaListUl } from 'react-icons/fa';
 import { FaBackward, FaForward, FaMaximize, FaRepeat, FaShuffle } from 'react-icons/fa6';
 import type { SongMetadata } from '../model.ts'
@@ -32,6 +32,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const playPreviousTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playPreviousTrack);
   const playNextTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playNextTrack);
   const currentTrackIndex = useMusicPlayerStore((state:UseMusicPlayerStore) => state.currentTrackIndex);
+  const isLoading = useMusicPlayerStore((state:UseMusicPlayerStore) => state.isLoading);
 
   const songMetadata: SongMetadata = getCurrentSong() || { 
     coverArt: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1BhBgvAdx2cQwiyvb-89VbGVzgQbB983tfw&s', 
@@ -132,8 +133,8 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             <Button disabled={queue.length==0 || currentTrackIndex == 0}  onClick={() => playPreviousTrack()} className={styles['btn-rounded-circle']}>
               <FaBackward/>
             </Button>
-            <Button disabled={queue.length==0} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
-              {isPlaying ? <FaPause /> : <FaPlay />}
+            <Button disabled={queue.length==0 || isLoading} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
+              {isLoading ? <Spinner animation="border" size="sm" variant="light" /> : (isPlaying ? <FaPause /> : <FaPlay />)}
             </Button>
             <Button disabled={queue.length == currentTrackIndex+1}  onClick={() => playNextTrack()} className={styles['btn-rounded-circle']}>
               <FaForward/>

@@ -25,6 +25,7 @@ interface MusicPlayerState {
   isShuffling: boolean;
   isRepeating: boolean;
   volume: number;
+  isLoading: boolean;
 }
 
 interface MusicPlayerActions {
@@ -64,10 +65,22 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
       const howl = new Howl({
         src: [song.url],
         html5: true,
-        onend: () => get().onTrackEnd(),
+        onend: () => { 
+          get().onTrackEnd() 
+          set({isLoading : false});
+        },
+        onload: () => {
+          set({isLoading : false});
+        },
+        onloaderror: () => {
+          set({isLoading : false});
+        },
+        onplay: () => {
+          set({isLoading : false});
+        }
       });
       howl.play();
-      set({ player: howl, isPlaying: true, currentTrackIndex: index });
+      set({ player: howl, isPlaying: true, isLoading:true, currentTrackIndex: index });
       console.log(`Playing: ${song.title} by ${song.artist}`);
       if (song.id) {
         auditSong(song.id);
@@ -82,6 +95,7 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
     isPlaying: false,
     isShuffling: false,
     isRepeating: false,
+    isLoading: false,
     volume: Howler.volume(),
 
     playTrack: playTrackInternal,

@@ -18,6 +18,12 @@ declare module 'container/backendService' {
 
   export declare const getUser: () => any;
 
+  export declare const fetchLikedSongs: () => Promise<string[]>;
+
+  export declare const likeSong: (songId: string) => Promise<void>;
+
+  export declare const unlikeSong: (songId: string) => Promise<void>;
+
 }
 
 declare module 'container/musicPlayer' {
@@ -33,6 +39,7 @@ declare module 'container/musicPlayer' {
     isPlaying: boolean;
     isShuffling: boolean;
     isRepeating: boolean;
+    isLoading: boolean;
     volume: number;
   }
 

@@ -5,9 +5,9 @@ import FooterMusicPlayer from './FooterMusicPlayer';
 import trackList from "container/MockedMusic";
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
 import { MdLibraryMusic, MdRefresh } from 'react-icons/md';
-import { FaPlus } from 'react-icons/fa6';
+import { FaPlus, FaHeart } from 'react-icons/fa6';
 import type { SongMetadata } from '../model';
-import { getRecentlyPlayedSongs } from 'container/backendService';
+import { fetchLikedSongs, getRecentlyPlayedSongs, likeSong, unlikeSong } from 'container/backendService';
 
 const mockTracks = [ 
   ...trackList
@@ -79,6 +79,44 @@ const Dashboard = () => {
     }
   }, []);
 
+  const [likedSongIds, setLikedSongIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let mounted = true;
+    fetchLikedSongs()
+      .then((songIds: string[]) => {
+      if (mounted) setLikedSongIds(new Set<string>(songIds));
+      })
+      .catch((err: unknown) => {
+      console.error("Failed to fetch liked songs", err);
+      });
+    return () => { mounted = false };
+  }, []);
+
+  const isLiked = (songId?: string): boolean => !!songId && likedSongIds.has(songId);
+
+  const toggleLike = async (songId?: string) => {
+    if (!songId) return;
+
+    const updated = new Set(likedSongIds);
+    const alreadyLiked = updated.has(songId);
+
+    alreadyLiked ? updated.delete(songId) : updated.add(songId);
+    setLikedSongIds(new Set(updated));
+
+    try {
+      if (alreadyLiked) {
+        await unlikeSong(songId);
+      } else {
+        await likeSong(songId);
+      }
+    } catch (err) {
+      console.error("Like toggle failed", err);
+      alreadyLiked ? updated.add(songId) : updated.delete(songId);
+      setLikedSongIds(new Set(updated));
+    }
+  };
+
   const spinner = (
     <Col xs={12} className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
       <Spinner animation="border" role="status" variant="primary" />
@@ -86,6 +124,7 @@ const Dashboard = () => {
     </Col>
   );
 
+  
   return (
     <Container fluid className="p-4 mb-5">
       <div className="d-flex flex-column min-vh-100">
@@ -176,6 +215,12 @@ const Dashboard = () => {
                               onClick={() => addSongToQueue(item)}>
                               <FaPlus />
                             </Button>
+                            <Button
+                              variant="light"
+                              className={isLiked(item.id) ? "rounded-circle p-3 m-4 shadow-lg bg-danger" : "rounded-circle p-3 m-4 shadow-lg"}
+                              onClick={() => toggleLike(item.id)}>
+                              <FaHeart />
+                            </Button>
                           </div>
                           <div className="text-center d-flex flex-column justify-content-between">
                             <div className="text-light mb-1 fs-6 text-truncate">
@@ -231,6 +276,12 @@ const Dashboard = () => {
                       onClick={() => addSongToQueue(track)}>
                       <FaPlus />
                     </Button>
+                    <Button
+                      variant="primary"
+                      className={isLiked(track.id) ? "rounded-circle shadow-lg bg-danger" : "rounded-circle shadow-lg"}
+                      onClick={() => toggleLike(track.id)}>
+                      <FaHeart />
+                    </Button>
                   </div>
                 </ListGroup.Item>
               ))}
@@ -273,6 +324,12 @@ const Dashboard = () => {
                           className="rounded-circle p-3 m-4 shadow-lg"
                           onClick={() => addSongToQueue(item)}>
                           <FaPlus />
+                        </Button>
+                        <Button
+                          variant="light"
+                          className={isLiked && isLiked(item.id) ? "rounded-circle p-3 m-4 shadow-lg bg-danger" : "rounded-circle p-3 m-4 shadow-lg"}
+                          onClick={() => toggleLike && toggleLike(item.id)}>
+                          <FaHeart />
                         </Button>
                       </div>
                       <div className="text-center d-flex flex-column justify-content-between">

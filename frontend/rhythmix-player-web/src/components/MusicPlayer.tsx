@@ -10,6 +10,7 @@ import {
   Badge,
   OverlayTrigger,
   Tooltip,
+  Spinner,
 } from 'react-bootstrap';
 import {
   FaPlay,
@@ -30,6 +31,7 @@ const MusicPlayer: React.FC = () => {
   const isShuffling = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isShuffling);
   const isRepeating = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isRepeating);
   const isPlaying = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isPlaying);
+  const isLoading = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isLoading);
   const seekTo = useMusicPlayerStore((state: UseMusicPlayerStore) => state.seekTo);
   const getCurrentSong = useMusicPlayerStore((state: UseMusicPlayerStore) => state.getCurrentSong);
   const togglePlayPause = useMusicPlayerStore((state:UseMusicPlayerStore) => state.togglePlayPause);
@@ -159,11 +161,11 @@ const MusicPlayer: React.FC = () => {
                 </Button>
               </OverlayTrigger>
               <OverlayTrigger overlay={<Tooltip>{playing ? 'Pause' : 'Play'}</Tooltip>}>
-                <Button className='btn-rounded-circle' variant="light" onClick={() =>{
+                <Button disabled={isLoading} className='btn-rounded-circle' variant="light" onClick={() =>{
                   togglePlayPause();
                   setIsPlaying(!isPlaying);
                 }}>
-                  {playing ? <FaPause /> : <FaPlay />}
+                  {isLoading ? <Spinner animation="border" size="sm" variant="light" /> : (isPlaying ? <FaPause /> : <FaPlay />)}  
                 </Button>
               </OverlayTrigger>
               <OverlayTrigger overlay={<Tooltip>Play Next Track</Tooltip>}>

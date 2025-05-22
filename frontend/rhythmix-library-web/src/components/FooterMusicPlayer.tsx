@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import { FaPlay, FaPause, FaListUl } from 'react-icons/fa';
 import { FaBackward, FaForward, FaMaximize, FaRepeat, FaShuffle } from 'react-icons/fa6';
 import type { SongMetadata } from '../model.ts'
@@ -21,6 +21,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const isShuffling = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isShuffling);
   const isRepeating = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isRepeating);
   const isPlaying = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isPlaying);
+  const isLoading = useMusicPlayerStore((state: UseMusicPlayerStore) => state.isLoading);
   const seekTo = useMusicPlayerStore((state: UseMusicPlayerStore) => state.seekTo);
   const getCurrentSong = useMusicPlayerStore((state: UseMusicPlayerStore) => state.getCurrentSong);
   const togglePlayPause = useMusicPlayerStore((state:UseMusicPlayerStore) => state.togglePlayPause);
@@ -131,8 +132,8 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             <Button disabled={queue.length==0 || currentTrackIndex == 0}  onClick={() => playPreviousTrack()} className={styles['btn-rounded-circle']}>
               <FaBackward/>
             </Button>
-            <Button disabled={queue.length==0} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
-              {isPlaying ? <FaPause /> : <FaPlay />}
+            <Button disabled={queue.length==0 || isLoading} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
+              {isLoading ? <Spinner animation="border" size="sm" variant="light" /> : (isPlaying ? <FaPause /> : <FaPlay />)}
             </Button>
             <Button disabled={queue.length == currentTrackIndex+1}  onClick={() => playNextTrack()} className={styles['btn-rounded-circle']}>
               <FaForward/>

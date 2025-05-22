@@ -149,3 +149,24 @@ export const getSongsByPreference = async (
   }
   return { status: 500, data: { message: 'An unknown error occurred' } };
 };
+
+
+export async function fetchLikedSongs(): Promise<string[]> {
+  // GET /api/user/liked-songs
+  //const res = await axios.get('/api/user/liked-songs');
+  return []; // e.g. ['songId1', 'songId2']
+}
+
+export async function likeSong(songId: string) {
+  // POST /api/user/like
+  console.log('likeSong', songId);
+  // const res = await axios.post('/api/user/like', { songId });
+  return true;
+}
+
+export async function unlikeSong(songId: string) {
+  // POST /api/user/unlike
+  console.log('unlikeSong', songId);
+  // const res = await axios.post('/api/user/unlike', { songId });
+  return false;
+}
