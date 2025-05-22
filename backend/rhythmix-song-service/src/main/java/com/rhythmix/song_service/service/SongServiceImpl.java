@@ -37,13 +37,13 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Page<Song> getPlaylistSongs(String playlistName, int page, int pageSize) {
-        if (LIKED.equals(playlistName)) {
-            return songRepository.findLikedSongs(PageRequest.of(page, pageSize))
-                    .map(songConverter::toDto);
+    public List<Song> getPlaylistSongs(String playlistName, String userName, int page, int pageSize) {
+        if ("".equals(playlistName)) {
+            return songRepository.findLikedSongs(userName)
+                    .stream().map(songConverter::toDto).toList();
         }
-        return songRepository.findSongsByPlaylistName(playlistName, PageRequest.of(page, pageSize))
-                .map(songConverter::toDto);
+        return songRepository.findSongsByPlaylistName(playlistName, userName)
+                .stream().map(songConverter::toDto).toList();
     }
 
     @Override

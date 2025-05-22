@@ -32,14 +32,15 @@ public class SongController {
         );
     }
 
-    @GetMapping("/{playlistName}")
-    public ResponseEntity<Page<Song>> playlistSongs(
-            @PathVariable(name = "playlistName", value = "liked") String playlistName,
+    @GetMapping("/playlist/{playlistName}")
+    public ResponseEntity<List<Song>> playlistSongs(
+            @PathVariable(name = "playlistName") String playlistName,
+            @RequestHeader(name = "AuthUsername") String userName,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "0") int page
     ) {
         return ResponseEntity.ok(
-                songService.getPlaylistSongs(playlistName, page, pageSize)
+                songService.getPlaylistSongs(playlistName, userName, page, pageSize)
         );
     }
 

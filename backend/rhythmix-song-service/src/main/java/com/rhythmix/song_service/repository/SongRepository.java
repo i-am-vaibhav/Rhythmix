@@ -19,42 +19,42 @@ public interface SongRepository extends JpaRepository<Song, BigDecimal>, QueryBy
             value = """
                       SELECT s.*
                         FROM song s
-                        JOIN user_library ul
-                          ON s.id = ul.song_id
-                       WHERE ul.playlist_name = :playlistName
+                        JOIN UserLibrary ul
+                          ON s.id = ul.songId
+                       WHERE ul.playlistName = :playlistName and ul.userName = :userName
                     """,
             countQuery = """
                       SELECT COUNT(*)
                         FROM song s
-                        JOIN user_library ul
-                          ON s.id = ul.song_id
-                       WHERE ul.playlist_name = :playlistName
+                        JOIN UserLibrary ul
+                          ON s.id = ul.songId
+                       WHERE ul.playlistName = :playlistName and ul.userName = :userName
                     """,
             nativeQuery = true
     )
-    Page<Song> findSongsByPlaylistName(
+    List<Song> findSongsByPlaylistName(
             @Param("playlistName") String playlistName,
-            Pageable pageable
+            @Param("userName") String userName
     );
 
     @Query(
             value = """
                       SELECT s.*
                         FROM song s
-                        JOIN user_library ul
-                          ON s.id = ul.song_id
-                       WHERE ul.liked = true
+                        JOIN UserLibrary ul
+                          ON s.id = ul.songId
+                       WHERE ul.liked = true and ul.userName = :userName
                     """,
             countQuery = """
                       SELECT COUNT(*)
                         FROM song s
-                        JOIN user_library ul
-                          ON s.id = ul.song_id
-                       WHERE ul.liked = true
+                        JOIN UserLibrary ul
+                          ON s.id = ul.songId
+                       WHERE ul.liked = true and ul.userName = :userName
                     """,
             nativeQuery = true
     )
-    Page<Song> findLikedSongs(Pageable pageable);
+    List<Song> findLikedSongs(@Param("userName") String userName);
 
     List<Song> findByGenreContainingIgnoreCase(String genre);
 

@@ -1,7 +1,7 @@
 -- --------------------------------------------------
 -- 1) Seed the `song` table with 49 tracks
 -- --------------------------------------------------
-INSERT INTO song (id, url, album, genre, language, artist, title, cover_art, created_at) VALUES
+INSERT INTO song (id, url, album, genre, language, artist, title, coverArt, createdAt) VALUES
   (1,
    'https://pagalall.com/wp-content/uploads/all/Tum%20Hi%20Ho%20Aashiqui%202%20(pagalall.com).mp3',
    'Aashiqui',

@@ -16,7 +16,7 @@ public class UserLibrary {
 
     private UUID id;
 
-    private UUID userId;
+    private String userName;
 
     private BigDecimal songId;
 

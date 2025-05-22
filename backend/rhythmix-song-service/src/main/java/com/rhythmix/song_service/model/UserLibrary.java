@@ -1,5 +1,6 @@
 package com.rhythmix.song_service.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -19,24 +20,32 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_library")
+@Table
 public class UserLibrary {
 
     @Id
     private UUID id;
 
-    private UUID userId;
+    @Column(name = "userName")
+    private String userName;
 
+    @Column(name = "songId")
     private BigDecimal songId;
 
+    @Column(name = "liked")
     private Boolean liked;
 
+    @Column(name = "playlistName")
     private String playlistName;
 
     @CreationTimestamp
+
+    @Column(name = "createdAt")
     private Instant createdAt;
 
     @UpdateTimestamp
+
+    @Column(name = "updatedAt")
     private Instant updatedAt;
 
 }

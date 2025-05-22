@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface SongService {
 
-    Page<Song> getPlaylistSongs(String playlistName, int page, int pageSize);
+    List<Song> getPlaylistSongs(String playlistName, String userName, int page, int pageSize);
 
     Map<String,List<Song>> getSongsByPreferences(String preference, PreferenceType preferenceType);
 
