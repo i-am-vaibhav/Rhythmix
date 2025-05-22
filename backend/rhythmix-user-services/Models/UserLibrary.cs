@@ -12,7 +12,7 @@ namespace rhythmix_user_services.Models
         public string userName { get; set; }
         public decimal songId { get; set; }
         public bool liked { get; set; }
-        public string playlistName { get; set; }
+        public string? playlistName { get; set; }
         public DateTime createdAt { get; set; }
         public DateTime updatedAt { get; set; }
     }
