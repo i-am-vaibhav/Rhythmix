@@ -19,15 +19,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 
 // Optional: Swagger for API testing (in dev only)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-
-Console.WriteLine("Connection string: " + builder.Configuration["ConnectionStrings__DefaultConnection"]);
-
-
 
 var app = builder.Build();
 

@@ -12,7 +12,7 @@ using rhythmix_user_services.Data;
 namespace rhythmix_user_services.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250517143948_InitialCreate")]
+    [Migration("20250520212205_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -66,15 +66,25 @@ namespace rhythmix_user_services.Migrations
                     b.Property<Guid?>("UserDetailsuserId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("isLiked")
-                        .HasColumnType("boolean");
+                    b.Property<DateTime>("createdAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
 
-                    b.Property<Guid>("mediaId")
-                        .HasColumnType("uuid");
+                    b.Property<bool>("liked")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("playlistName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("songId")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("updatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<Guid>("userId")
                         .HasColumnType("uuid");
