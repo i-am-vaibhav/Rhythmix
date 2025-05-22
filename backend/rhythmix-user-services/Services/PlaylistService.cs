@@ -30,7 +30,6 @@ namespace rhythmix_user_services.Services
                 {
                     userName = user.userName,
                     songId = dto.songId,
-                    liked = dto.playlistName.ToLower() == Liked,
                     playlistName = dto.playlistName
                 };
                 _context.UserLibrary.Add(entry);
@@ -38,7 +37,6 @@ namespace rhythmix_user_services.Services
             else
             {
                 entry.playlistName = dto.playlistName;
-                entry.liked = dto.playlistName.ToLower() == Liked;
             }
 
             await _context.SaveChangesAsync();
@@ -59,23 +57,19 @@ namespace rhythmix_user_services.Services
 
         public async Task DeletePlaylistAsync(string userName, string playlistName)
         {
-            var user = await _context.UserDetails.FirstOrDefaultAsync(u => u.userName == userName);
-            if (user == null)
-                throw new Exception("User not found");
-
             var entries = await _context.UserLibrary
-                .Where(ul => ul.userName == user.userName && ul.playlistName == playlistName)
+                .Where(ul => ul.userName == userName && ul.playlistName == playlistName)
                 .ToListAsync();
 
             foreach (var entry in entries)
             {
-                if (playlistName.ToLower() == Liked)
+                if (entry.liked)
                 {
                     entry.playlistName = null;
                 }
                 else
                 {
-                    _context.UserLibrary.Remove(entry);
+                    _context.UserLibrary.Remove(entry); // Delete if not liked
                 }
             }
 
@@ -84,21 +78,19 @@ namespace rhythmix_user_services.Services
 
         public async Task DeleteSongFromPlaylistAsync(string userName, decimal songId, string playlistName)
         {
-            var user = await _context.UserDetails.FirstOrDefaultAsync(u => u.userName == userName);
-            if (user == null)
-                throw new Exception("User not found");
-
             var entry = await _context.UserLibrary
-                .FirstOrDefaultAsync(ul => ul.userName == user.userName && ul.songId == songId && ul.playlistName == playlistName);
+                .FirstOrDefaultAsync(ul => ul.userName == userName && ul.songId == songId && ul.playlistName == playlistName);
 
             if (entry != null)
             {
-                if (playlistName.ToLower() == Liked)
+                if (entry.liked)
                 {
+                    // Keep the row, remove it from the playlist
                     entry.playlistName = null;
                 }
                 else
                 {
+                    // Remove only if it's not liked
                     _context.UserLibrary.Remove(entry);
                 }
 
