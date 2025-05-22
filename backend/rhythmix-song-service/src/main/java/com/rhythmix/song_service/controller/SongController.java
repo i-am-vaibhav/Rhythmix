@@ -54,9 +54,9 @@ public class SongController {
         );
     }
 
-    @GetMapping("/recently-played/{userName}")
+    @GetMapping("/recently-played")
     public ResponseEntity<List<Song>> recentlyPlayedSongs(
-            @PathVariable(name = "userName") String userName
+            @RequestHeader(name = "AuthUsername") String userName
             ){
         return ResponseEntity.ok(
                 songService.getRecentlyPlayedSongs(userName)

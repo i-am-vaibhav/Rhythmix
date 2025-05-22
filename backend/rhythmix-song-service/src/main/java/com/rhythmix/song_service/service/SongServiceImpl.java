@@ -38,7 +38,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public List<Song> getPlaylistSongs(String playlistName, String userName, int page, int pageSize) {
-        if ("".equals(playlistName)) {
+        if (LIKED.equals(playlistName)) {
             return songRepository.findLikedSongs(userName)
                     .stream().map(songConverter::toDto).toList();
         }
