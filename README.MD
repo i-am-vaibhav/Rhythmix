@@ -1,8 +1,10 @@
 # Rhythmix
 
-Rhythmix is a modern and intuitive web-based music player application designed to provide a seamless music listening experience. With a sleek interface and powerful features, Rhythmix lets you enjoy your favorite tracks anytime, anywhere.
+**Rhythmix** is a modern and intuitive web-based music player application designed to provide a seamless music listening experience. With a sleek interface and powerful features, Rhythmix lets you enjoy your favorite tracks anytime, anywhere.
 
-## Features
+---
+
+## 🎵 Features
 
 - **Play, Pause, and Skip Tracks**: Control your music effortlessly.
 - **Playlist Management**: Create, edit, and organize playlists.
@@ -10,37 +12,112 @@ Rhythmix is a modern and intuitive web-based music player application designed t
 - **Responsive Design**: Enjoy a smooth experience on any device.
 - **Customizable Themes**: Personalize the look and feel of the app.
 
-## Technologies Used
+---
+
+## 🛠 Technologies Used
 
 - **Frontend**: HTML, CSS, JavaScript, React.js
 - **Backend**: Spring Boot, Java
-- **Database**: MongoDB, PostgresSQL
+- **Database**: MongoDB, PostgreSQL
 
-## Installation
+---
 
-1. Clone the repository:
+## 🚀 Getting Started with Docker Compose
 
-```bash
-git clone https://github.com/i-am-vaibhav/rhythmix.git
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Clone the Repository
+
 ```
-
-2. Navigate to the project directory:
-
-```bash
+git clone https://github.com/i-am-vaibhav/rhythmix.git
 cd rhythmix
 ```
 
-3. Install dependencies:
+### Build and Run the Application
 
-```bash
-npm install
+```
+docker-compose up --build
 ```
 
-4. Start the development server:
+##This command will:
 
-```bash
-npm start
+Build all frontend and backend services.
+
+Set up and start all containers (including PostgreSQL and the Config Server).
+
+Expose the following services on your local machine:
+
+Service
+
+URL
+
+Rhythmix Web Frontend http://localhost:5173
+
+Rhythmix Player Web http://localhost:3000
+ 
+Rhythmix Library Web http://localhost:3001
+
+Rhythmix Home Web http://localhost:3002
+
+Config Server http://localhost:8888
+
+Gateway http://localhost:8761
+
+Auth Service http://localhost:8100
+
+Song Service http://localhost:8200
+
+User Service http://localhost:8080
+
+PostgreSQL Database localhost:5432
+
+### Stopping the Application
+
+To stop the running containers:
+
+
 ```
+docker-compose down
+```
+
+To stop and remove all containers, networks, and volumes:
+
+
+```
+docker-compose down -v
+
+```
+
+###📍 Notes
+
+Make sure no other services are running on the ports mentioned above.
+
+PostgreSQL is configured with the following credentials:
+
+Username: rhythmix
+
+Password: rhythmix
+
+Database: rhythmix
+
+### 📂 Project Structure
+
+.
+├── backend
+│   ├── rhythmix-auth-service
+│   ├── rhythmix-config-server
+│   ├── rhythmix-gateway
+│   ├── rhythmix-song-service
+│   └── rhythmix-user-services
+├── frontend
+│   ├── rhythmix-home-web
+│   ├── rhythmix-library-web
+│   ├── rhythmix-player-web
+│   └── rhythmix-web
+└── docker-compose.yml
 
 ## Contributing
 
