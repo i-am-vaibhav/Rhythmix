@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using rhythmix_user_services.Data;
 using rhythmix_user_services.DTOs;
 using rhythmix_user_services.Models;
@@ -21,23 +21,13 @@ namespace rhythmix_user_services.Services
             if (user == null)
                 throw new Exception("User not found");
 
-            var entry = await _context.UserLibrary
-                .FirstOrDefaultAsync(ul => ul.userName == user.userName && ul.songId == dto.songId);
-
-            if (entry == null)
+            var entry = new UserLibrary
             {
-                entry = new UserLibrary
-                {
-                    userName = user.userName,
-                    songId = dto.songId,
-                    playlistName = dto.playlistName
-                };
-                _context.UserLibrary.Add(entry);
-            }
-            else
-            {
-                entry.playlistName = dto.playlistName;
-            }
+                userName = user.userName,
+                songId = dto.songId,
+                playlistName = dto.playlistName
+            };
+            _context.UserLibrary.Add(entry);
 
             await _context.SaveChangesAsync();
         }
