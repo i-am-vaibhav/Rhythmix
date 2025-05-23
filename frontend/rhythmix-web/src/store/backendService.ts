@@ -89,8 +89,7 @@ export const getSongs = async (keyword:string) => {
 // Get Recently Played Songs API call
 export const getRecentlyPlayedSongs = async (): Promise<ServerResponse> => {
   try {
-    const userName = getUser().userName;
-    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/recently-played/${userName}`, {
+    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/recently-played`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
         AuthUsername: getUser().userName,
@@ -150,23 +149,153 @@ export const getSongsByPreference = async (
   return { status: 500, data: { message: 'An unknown error occurred' } };
 };
 
+// Get Liked Songs
+export const getPlaylistSongs = async (playlistName:string): Promise<ServerResponse> => {
+  try {
+    const response : ServerResponse = await axios.get(`${API_BASE_URL}/songs/playlist/${playlistName}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
+      }
+    });
+    console.log('Playlist songs:', response.data);
+    return { status: response.status, data: response.data };
+  }
+  catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    } 
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
+};
 
-export async function fetchLikedSongs(): Promise<string[]> {
-  // GET /api/user/liked-songs
-  //const res = await axios.get('/api/user/liked-songs');
-  return []; // e.g. ['songId1', 'songId2']
+// DTO for AddSongToPlaylist
+interface AddToPlaylistDto {
+  userName: string;
+  playlistName: string;
+  songId: number;
 }
 
-export async function likeSong(songId: string) {
-  // POST /api/user/like
-  console.log('likeSong', songId);
-  // const res = await axios.post('/api/user/like', { songId });
-  return true;
+// 1. Add Song to Playlist
+export async function addSongToPlaylist(dto: AddToPlaylistDto) {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/add-song`, dto, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
+      }
+    });
+    console.log('Song added:', response.status);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
 }
 
-export async function unlikeSong(songId: string) {
-  // POST /api/user/unlike
-  console.log('unlikeSong', songId);
-  // const res = await axios.post('/api/user/unlike', { songId });
-  return false;
+// 2. Get User Playlists
+export async function getUserPlaylists() {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/${getUser().userName}/collections`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
+      }
+    });
+    console.log('Playlists:', response.data);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
+}
+
+// 3. Delete Playlist
+export async function deletePlaylist(playlistName: string) {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/users/${getUser().userName}/collections/${playlistName}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
+      }
+    });
+    console.log('Playlist deleted:', response.status);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
+}
+
+// 4. Delete Song from Playlist
+export async function deleteSongFromPlaylist(playlistName: string, songId: number) {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/users/${getUser().userName}/collections/${playlistName}/songs/${songId}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        AuthUsername: getUser().userName,
+      }
+    });
+    console.log('Song deleted from playlist:', response.status);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
+}
+
+// 5. Like Song
+export async function likeSong(songId: number) {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/users/${getUser().userName}/songs/${songId}/like`,     
+    {}, // No request body
+    {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          AuthUsername: getUser().userName,
+        }
+    });
+    console.log('Song liked:', response.status);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
+}
+
+// 6. Unlike Song
+export async function unlikeSong(songId: number) {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/users/${getUser().userName}/songs/${songId}/unlike`, 
+    {}, // No request body
+    {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          AuthUsername: getUser().userName,
+        }
+    });
+    console.log('Song unliked:', response.status);
+    return { status: 200, data: response.data };
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      return { status: error.response.status, data: error.response.data };
+    }
+  }
+  return { status: 500, data: { message: 'An unknown error occurred' } };
 }

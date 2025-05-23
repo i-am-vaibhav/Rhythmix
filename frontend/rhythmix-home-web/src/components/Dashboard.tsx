@@ -13,13 +13,13 @@ import {
   Button,
   Spinner,
 } from 'react-bootstrap';
-import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaPlay } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { fetchLikedSongs, getRecentlyPlayedSongs, getSongs, getSongsByPreference, likeSong, unlikeSong } from 'container/backendService';
+import { addSongToPlaylist, getPlaylistSongs, getRecentlyPlayedSongs, getSongs, getSongsByPreference, getUserPlaylists, likeSong, unlikeSong } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
 import { MdRefresh } from 'react-icons/md';
-import { FaHeart } from 'react-icons/fa6';
+import SongActionMenu from './SongActionMenu';
 
 export interface Playlist {
   coverArt:string,
@@ -69,32 +69,44 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     let mounted = true;
-    fetchLikedSongs()
-      .then((songIds: string[]) => {
-      if (mounted) setLikedSongIds(new Set<string>(songIds));
-      })
-      .catch((err: unknown) => {
-      console.error("Failed to fetch liked songs", err);
-      });
-    return () => { mounted = false };
+    const fetchLikedSongs = async () => {
+      try {
+        const response = await getPlaylistSongs('liked');
+        if (response.status === 200) {
+          const songs = response.data;
+          const songIds = new Set<string>();
+          songs.forEach((song: SongMetadata) => {
+            songIds.add(song.id);
+          });
+          if (mounted) setLikedSongIds(songIds);
+        }
+      } catch (error) {
+        console.error('Error fetching liked songs:', error);
+      }
+    };  
+    fetchLikedSongs();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const isLiked = (songId?: string): boolean => !!songId && likedSongIds.has(songId);
+  const isLiked = (songId: string): boolean => !!songId && likedSongIds.has(songId);
 
-  const toggleLike = async (songId?: string) => {
+  const toggleLike = async (songId: string): Promise<void> => {
     if (!songId) return;
-
+    console.log('Toggling like for song:', songId);
     const updated = new Set(likedSongIds);
     const alreadyLiked = updated.has(songId);
 
     alreadyLiked ? updated.delete(songId) : updated.add(songId);
     setLikedSongIds(new Set(updated));
-
     try {
       if (alreadyLiked) {
         await unlikeSong(songId);
+        console.log('Song unliked:', songId);
       } else {
         await likeSong(songId);
+        console.log('Song liked:', songId);
       }
     } catch (err) {
       console.error("Like toggle failed", err);
@@ -210,8 +222,8 @@ interface SectionProps {
   loader: boolean;
   showRefresh?: boolean;
   refresh?: () => void;
-  isLiked?: (songId?: string) => boolean;
-  toggleLike?: (songId?: string) => void;
+  isLiked?: (songId: string) => boolean;
+  toggleLike?: (songId: string) => Promise<void>;
 }
 
 const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader, showRefresh, refresh, isLiked, toggleLike }) => {
@@ -280,19 +292,14 @@ const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader,
                     >
                       <FaPlay />
                     </Button>
-                    <Button
-                      variant="light"
-                      className="rounded-circle p-3 m-4 shadow-lg"
-                      onClick={() => addSongToQueue(item)}
-                    >
-                      <FaPlus />
-                    </Button>
-                    <Button
-                      variant="light"
-                      className={isLiked && isLiked(item.id) ? "rounded-circle p-3 m-4 shadow-lg bg-danger" : "rounded-circle p-3 m-4 shadow-lg"}
-                      onClick={() => toggleLike && toggleLike(item.id)}>
-                      <FaHeart />
-                    </Button>
+                    <SongActionMenu
+                            song={item}
+                            addSongToQueue={() => addSongToQueue(item)}
+                            toggleLike={toggleLike ?? (async () => {})}
+                            isLiked={isLiked ?? (() => false)}
+                            addSongToPlaylist={addSongToPlaylist}
+                            getUserPlaylists={getUserPlaylists}
+                        />
                   </div>
                   <div className="text-center d-flex flex-column justify-content-between">
                     <div className="text-light mb-1 fs-6 text-truncate">

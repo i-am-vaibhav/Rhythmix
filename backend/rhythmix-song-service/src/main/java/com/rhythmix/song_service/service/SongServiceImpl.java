@@ -31,18 +31,21 @@ public class SongServiceImpl implements SongService {
 
     private final SongConverter songConverter = Mappers.getMapper(SongConverter.class);
 
-    public SongServiceImpl(SongRepository songRepository, SongAuditRepository songAuditRepository) {
+    private final NativeQueryService nativeQueryService;
+
+    public SongServiceImpl(SongRepository songRepository, SongAuditRepository songAuditRepository, NativeQueryService nativeQueryService) {
         this.songRepository = songRepository;
         this.songAuditRepository = songAuditRepository;
+        this.nativeQueryService = nativeQueryService;
     }
 
     @Override
     public List<Song> getPlaylistSongs(String playlistName, String userName, int page, int pageSize) {
         if (LIKED.equals(playlistName)) {
-            return songRepository.findLikedSongs(userName)
+            return nativeQueryService.findLikedSongs(userName)
                     .stream().map(songConverter::toDto).toList();
         }
-        return songRepository.findSongsByPlaylistName(playlistName, userName)
+        return nativeQueryService.findSongsByPlaylist(playlistName, userName)
                 .stream().map(songConverter::toDto).toList();
     }
 

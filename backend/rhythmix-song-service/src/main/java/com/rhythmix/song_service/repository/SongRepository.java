@@ -14,48 +14,6 @@ import java.util.List;
 
 @Repository
 public interface SongRepository extends JpaRepository<Song, BigDecimal>, QueryByExampleExecutor<Song> {
-
-    @Query(
-            value = """
-                      SELECT s.*
-                        FROM song s
-                        JOIN UserLibrary ul
-                          ON s.id = ul.songId
-                       WHERE ul.playlistName = :playlistName and ul.userName = :userName
-                    """,
-            countQuery = """
-                      SELECT COUNT(*)
-                        FROM song s
-                        JOIN UserLibrary ul
-                          ON s.id = ul.songId
-                       WHERE ul.playlistName = :playlistName and ul.userName = :userName
-                    """,
-            nativeQuery = true
-    )
-    List<Song> findSongsByPlaylistName(
-            @Param("playlistName") String playlistName,
-            @Param("userName") String userName
-    );
-
-    @Query(
-            value = """
-                      SELECT s.*
-                        FROM song s
-                        JOIN UserLibrary ul
-                          ON s.id = ul.songId
-                       WHERE ul.liked = true and ul.userName = :userName
-                    """,
-            countQuery = """
-                      SELECT COUNT(*)
-                        FROM song s
-                        JOIN UserLibrary ul
-                          ON s.id = ul.songId
-                       WHERE ul.liked = true and ul.userName = :userName
-                    """,
-            nativeQuery = true
-    )
-    List<Song> findLikedSongs(@Param("userName") String userName);
-
     List<Song> findByGenreContainingIgnoreCase(String genre);
 
     List<Song> findByLanguageContainingIgnoreCase(String language);

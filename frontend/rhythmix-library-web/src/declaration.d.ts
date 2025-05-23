@@ -44,16 +44,15 @@ declare module 'container/musicPlayer' {
   export const useMusicPlayerStore: UseMusicPlayerStore;
 }
 
-declare module 'container/MockedMusic' {
-  import type { SongMetadata } from './model';
-  const trackList: SongMetadata[];
-  export default trackList;
-}
-
 declare module 'container/backendService' {
   export interface ServerResponse {
     status: number;
     data: any;
+  }
+  export interface AddToPlaylistDto {
+    userName: string;
+    playlistName: string;
+    songId: string;
   }
 
   export declare const getSongs: (keyword: string) => Promise<ServerResponse>;
@@ -66,10 +65,18 @@ declare module 'container/backendService' {
 
   export declare const getUser: () => any;
 
-  export declare const fetchLikedSongs: () => Promise<string[]>;
+  export declare const getPlaylistSongs: (playlistName: string) => Promise<ServerResponse>;
 
-  export declare const likeSong: (songId: string) => Promise<void>;
+  export declare const likeSong: (songId: string) => Promise<ServerResponse>;
 
-  export declare const unlikeSong: (songId: string) => Promise<void>;
+  export declare const unlikeSong: (songId: string) => Promise<ServerResponse>;
+
+  export declare const getUserPlaylists: () => Promise<ServerResponse>;
+
+  export declare const addSongToPlaylist: (dtp:AddToPlaylistDto) => Promise<ServerResponse>;
+
+  export declare const deletePlaylist: (playlistName: string) => Promise<ServerResponse>;
+
+  export declare const deleteSongFromPlaylist: (playlistName: string, songId: numberq) => Promise<ServerResponse>;
 
 }

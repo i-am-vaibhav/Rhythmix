@@ -7,6 +7,11 @@ declare module 'container/backendService' {
     status: number;
     data: any;
   }
+  export interface AddToPlaylistDto {
+    userName: string;
+    playlistName: string;
+    songId: string;
+  }
 
   export declare const getSongs: (keyword: string) => Promise<ServerResponse>;
 
@@ -18,11 +23,15 @@ declare module 'container/backendService' {
 
   export declare const getUser: () => any;
 
-  export declare const fetchLikedSongs: () => Promise<string[]>;
+  export declare const getPlaylistSongs: (playlistName: string) => Promise<ServerResponse>;
 
-  export declare const likeSong: (songId: string) => Promise<void>;
+  export declare const likeSong: (songId: string) => Promise<ServerResponse>;
 
-  export declare const unlikeSong: (songId: string) => Promise<void>;
+  export declare const unlikeSong: (songId: string) => Promise<ServerResponse>;
+
+  export declare const getUserPlaylists: () => Promise<ServerResponse>;
+
+  export declare const addSongToPlaylist: (dtp:AddToPlaylistDto) => Promise<ServerResponse>;
 
 }
 
