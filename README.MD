@@ -60,6 +60,16 @@ Commands below are grouped by OS where syntax differs.
 
 ---
 
+## 🎥 Demo
+
+Check out a demo of Rhythmix in action:
+
+[![Rhythmix Demo](https://img.youtube.com/vi/1nCzH8EID_ORCk5Xh6D8SMqjH50plxVBO/0.jpg)](https://drive.google.com/file/d/1nCzH8EID_ORCk5Xh6D8SMqjH50plxVBO/view?usp=sharing)
+
+[Watch the demo on Google Drive](https://drive.google.com/file/d/1nCzH8EID_ORCk5Xh6D8SMqjH50plxVBO/view?usp=sharing)
+
+---
+
 ## 🏗️ Build & Run Backend Services
 
 Maven, Dotnet is required to build backend services:
