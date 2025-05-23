@@ -23,7 +23,7 @@ Commands below are grouped by OS where syntax differs.
 ## 🛠 Prerequisites
 
 - **Java 17+** (for Spring Boot services)
-- **Maven** (for building backend services)
+- **Maven & Dotnet@8** (for building backend services)
 - **Node.js 16+ & npm** (for building frontends)
 - **PostgreSQL 14+** (local or Docker)
 - **Git**
@@ -133,10 +133,9 @@ java -jar target\*.jar --server.port=8100
 cd backend/rhythmix-user-services
 dotnet restore
 dotnet publish -c Release -o out
-export POSTGRES_CONNECTION_STRING=Host=rhythmix-postgres;Port=5432;Database=rhythmix;Username=your_user;Password=your_password
-export SPRING__CLOUD__CONFIG__URI=http://rhythmix-config-server:8888
-export SPRING__PROFILES__ACTIVE=Production
-export ASPNETCORE_ENVIRONMENT=Production
+export SPRING__CLOUD__CONFIG__URI=http://localhost:8888
+export SPRING__PROFILES__ACTIVE=Local
+export ASPNETCORE_ENVIRONMENT=Local
 dotnet out/rhythmix_user_services.dll "--urls=http://*:8080"
 ```
 
@@ -146,10 +145,9 @@ dotnet out/rhythmix_user_services.dll "--urls=http://*:8080"
 cd backend\rhythmix-user-services
 dotnet restore
 dotnet publish -c Release -o out
-$Env:POSTGRES_CONNECTION_STRING= 'Host=rhythmix-postgres;Port=5432;Database=rhythmix;Username=your_user;Password=your_password'
-$Env:SPRING__CLOUD__CONFIG__URI= 'http://rhythmix-config-server:8888'
-$Env:SPRING__PROFILES__ACTIVE= 'Production'
-$Env:ASPNETCORE_ENVIRONMENT= 'Production'
+$Env:SPRING__CLOUD__CONFIG__URI= 'http://localhost:8888'
+$Env:SPRING__PROFILES__ACTIVE= 'Local'
+$Env:ASPNETCORE_ENVIRONMENT= 'Local'
 dotnet out/rhythmix_user_services.dll --urls=http://*:8080
 ```
 
