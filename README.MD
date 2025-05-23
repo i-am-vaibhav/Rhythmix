@@ -157,7 +157,7 @@ $Env:POSTGRES_JDBC_URL = 'jdbc:postgresql://localhost:5432/rhythmix'
 java -jar target\*.jar --server.port=8200
 ```
 
-### 5. Gateway (Eureka + Routing)
+### 5. Gateway (Routing)
 
 **macOS/Linux**
 ```bash
