@@ -1,118 +1,257 @@
-
 # Rhythmix
 
 **Rhythmix** is a modern and intuitive web-based music player application designed to provide a seamless music listening experience. With a sleek interface and powerful features, Rhythmix lets you enjoy your favorite tracks anytime, anywhere.
 
 ---
 
-## 🎵 Features
+## 🚀 Overview
 
-- **Play, Pause, and Skip Tracks**: Control your music effortlessly.
-- **Playlist Management**: Create, edit, and organize playlists.
-- **Search Functionality**: Quickly find your favorite songs or artists.
-- **Responsive Design**: Enjoy a smooth experience on any device.
-- **Customizable Themes**: Personalize the look and feel of the app.
+This guide explains how to manually build and run each microservice and frontend of Rhythmix on macOS, Linux, and Windows machines (PowerShell or Command Prompt). It also includes a reference Docker Compose file for an automated setup.
 
 ---
 
-## 🛠 Technologies Used
+## 💻 Cross-Platform Compatibility
 
-- **Frontend**: HTML, CSS, JavaScript, React.js  
-- **Backend**: Spring Boot, Java  
-- **Database**: MongoDB, PostgreSQL
+- **macOS & Linux**: Use Bash or Zsh terminals. Set environment variables with `export`.
+- **Windows (PowerShell)**: Use PowerShell. Set environment variables with `$Env:VAR = 'value'`.
+- **Windows (Command Prompt)**: Use `set VAR=value`.
 
----
-
-## 🚀 Getting Started with Docker Compose
-
-### Prerequisites
-
-- Docker  
-- Docker Compose
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/i-am-vaibhav/rhythmix.git
-cd rhythmix
-```
-
-### Build and Run the Application
-
-```bash
-docker-compose up --build
-```
-
-This command will:
-
-- Build all frontend and backend services.  
-- Set up and start all containers (including PostgreSQL and the Config Server).  
-- Expose the following services on your local machine:
-
-| **Service**               | **URL**                     |
-|--------------------------|-----------------------------|
-| Rhythmix Web Frontend    | http://localhost:5173       |
-| Rhythmix Player Web      | http://localhost:3000       |
-| Rhythmix Library Web     | http://localhost:3001       |
-| Rhythmix Home Web        | http://localhost:3002       |
-| Config Server            | http://localhost:8888       |
-| Gateway                  | http://localhost:8761       |
-| Auth Service             | http://localhost:8100       |
-| Song Service             | http://localhost:8200       |
-| User Service             | http://localhost:8080       |
-| PostgreSQL Database      | localhost:5432              |
-
-### Stopping the Application
-
-To stop the running containers:
-
-```bash
-docker-compose down
-```
-
-To stop and remove all containers, networks, and volumes:
-
-```bash
-docker-compose down -v
-```
+Commands below are grouped by OS where syntax differs.
 
 ---
 
-### 📍 Notes
+## 🛠 Prerequisites
 
-- Make sure no other services are running on the ports mentioned above.
-- PostgreSQL is configured with the following credentials:
-  - **Username**: `rhythmix`
-  - **Password**: `rhythmix`
-  - **Database**: `rhythmix`
+- **Java 17+** (for Spring Boot services)
+- **Maven** (for building backend services)
+- **Node.js 16+ & npm** (for building frontends)
+- **PostgreSQL 14+** (local or Docker)
+- **Git**
+- **Optional**: Docker & Docker Compose (for DB or full automated setup)
 
 ---
 
-### 📂 Project Structure
+## 🗄️ Database Setup
+
+### Local PostgreSQL
+
+1. Install PostgreSQL.
+2. Create database and user:
+
+   **macOS/Linux (psql):**
+   ```bash
+   psql -U postgres
+   CREATE DATABASE rhythmix;
+   CREATE USER rhythmix WITH PASSWORD 'rhythmix';
+   GRANT ALL PRIVILEGES ON DATABASE rhythmix TO rhythmix;
+   ```
+
+   **Windows (PowerShell):**
+   ```powershell
+   psql -U postgres
+   CREATE DATABASE rhythmix;
+   CREATE USER rhythmix WITH PASSWORD 'rhythmix';
+   GRANT ALL PRIVILEGES ON DATABASE rhythmix TO rhythmix;
+   ```
+
+3. Ensure JDBC URL points to `jdbc:postgresql://localhost:5432/rhythmix`.
+
+---
+
+## 🏗️ Build & Run Backend Services
+
+Services live under `backend/`:
 
 ```
-.
-├── backend
-│   ├── rhythmix-auth-service
-│   ├── rhythmix-config-server
-│   ├── rhythmix-gateway
-│   ├── rhythmix-song-service
-│   └── rhythmix-user-services
-├── frontend
-│   ├── rhythmix-home-web
-│   ├── rhythmix-library-web
-│   ├── rhythmix-player-web
-│   └── rhythmix-web
-└── docker-compose.yml
+backend/
+├── rhythmix-config-server
+├── rhythmix-auth-service
+├── rhythmix-gateway
+├── rhythmix-song-service
+└── rhythmix-user-services
 ```
+
+### 1. Config Server
+
+**macOS/Linux**
+```bash
+cd backend/rhythmix-config-server
+mvn clean package -DskipTests
+java -jar target/*.jar --server.port=8888
+```
+
+**Windows (PowerShell)**
+```powershell
+cd backend\rhythmix-config-server
+mvn clean package -DskipTests
+java -jar target\*.jar --server.port=8888
+```
+
+_Health endpoint: http://localhost:8888/actuator/health_
+
+### 2. Auth Service
+
+**macOS/Linux**
+```bash
+cd backend/rhythmix-auth-service
+mvn clean package -DskipTests
+export CONFIG_SERVER_URL=http://localhost:8888
+export SPRING_PROFILES_ACTIVE=dev
+export USER_SERVICE_BASE_URL=http://localhost:8080
+java -jar target/*.jar --server.port=8100
+```
+
+**Windows (PowerShell)**
+```powershell
+cd backend\rhythmix-auth-service
+mvn clean package -DskipTests
+$Env:CONFIG_SERVER_URL = 'http://localhost:8888'
+$Env:SPRING_PROFILES_ACTIVE = 'dev'
+$Env:USER_SERVICE_BASE_URL = 'http://localhost:8080'
+java -jar target\*.jar --server.port=8100
+```
+
+### 3. User Service
+
+**macOS/Linux**
+```bash
+cd backend/rhythmix-user-services
+mvn clean package -DskipTests
+export POSTGRES_JDBC_URL=jdbc:postgresql://rhythmix-postgres:5432/rhythmix
+export SPRING__CLOUD__CONFIG__URI=http://rhythmix-config-server:8888
+export SPRING__PROFILES__ACTIVE=Production
+export ASPNETCORE_ENVIRONMENT=Production
+java -jar target/*.jar --server.port=8080
+```
+
+**Windows (PowerShell)**
+```powershell
+cd backend\rhythmix-user-services
+mvn clean package -DskipTests
+$Env:SPRING__CLOUD__CONFIG__URI = 'http://localhost:8888'
+$Env:SPRING__PROFILES__ACTIVE = 'Production'
+$Env:POSTGRES_JDBC_URL = 'jdbc:postgresql://localhost:5432/rhythmix'
+$Env:ASPNETCORE_ENVIRONMENT=Production
+java -jar target\*.jar --server.port=8080
+```
+
+### 4. Song Service
+
+**macOS/Linux**
+```bash
+cd backend/rhythmix-song-service
+mvn clean package -DskipTests
+export CONFIG_SERVER_URL=http://localhost:8888
+export SPRING_PROFILES_ACTIVE=dev
+export POSTGRES_JDBC_URL=jdbc:postgresql://localhost:5432/rhythmix
+java -jar target/*.jar --server.port=8200
+```
+
+**Windows (PowerShell)**
+```powershell
+cd backend\rhythmix-song-service
+mvn clean package -DskipTests
+$Env:CONFIG_SERVER_URL = 'http://localhost:8888'
+$Env:SPRING_PROFILES_ACTIVE = 'dev'
+$Env:POSTGRES_JDBC_URL = 'jdbc:postgresql://localhost:5432/rhythmix'
+java -jar target\*.jar --server.port=8200
+```
+
+### 5. Gateway (Eureka + Routing)
+
+**macOS/Linux**
+```bash
+cd backend/rhythmix-gateway
+mvn clean package -DskipTests
+export CONFIG_SERVER_URL=http://localhost:8888
+export SPRING_PROFILES_ACTIVE=dev
+export rhythmix_auth_service_url=http://localhost:8100
+export rhythmix_user_service_url=http://localhost:8080
+export rhythmix_song_service_url=http://localhost:8200
+export AUTH_SERVICE_BASE_URL=http://localhost:8100/auth
+export FRONTEND_URL=http://localhost:5173
+java -jar target/*.jar --server.port=8761
+```
+
+**Windows (PowerShell)**
+```powershell
+cd backend\rhythmix-gateway
+mvn clean package -DskipTests
+$Env:CONFIG_SERVER_URL = 'http://localhost:8888'
+$Env:SPRING_PROFILES_ACTIVE = 'dev'
+$Env:rhythmix_auth_service_url = 'http://localhost:8100'
+$Env:rhythmix_user_service_url = 'http://localhost:8080'
+$Env:rhythmix_song_service_url = 'http://localhost:8200'
+$Env:AUTH_SERVICE_BASE_URL = 'http://localhost:8100/auth'
+$Env:FRONTEND_URL = 'http://localhost:5173'
+java -jar target\*.jar --server.port=8761
+```
+
+---
+
+## 📱 Build & Run Frontend Apps
+
+Services live under `frontend/`:
+
+```
+frontend/
+├── rhythmix-home-web
+├── rhythmix-library-web
+├── rhythmix-player-web
+└── rhythmix-web
+```
+
+For each app, replace `<folder>` and `<port>` accordingly:
+
+**macOS/Linux**
+```bash
+cd frontend/<folder>
+npm install
+npm run build
+npx serve -s dist -l <port>
+```
+
+**Windows (PowerShell)**
+```powershell
+cd frontend\<folder>
+npm install
+npm run build
+npx serve -s dist -l <port>
+```
+
+| App               | Folder                 | Port  |
+|-------------------|------------------------|-------|
+| Home Web          | `rhythmix-home-web`    | 3002  |
+| Library Web       | `rhythmix-library-web` | 3001  |
+| Player Web        | `rhythmix-player-web`  | 3000  |
+| Main Portal (Web) | `rhythmix-web`         | 5173  |
+
+---
+
+## 🎛️ Environment Variables Summary
+
+**Backend services** (set via `export` or PowerShell `$Env`):
+
+- `CONFIG_SERVER_URL`
+- `SPRING_PROFILES_ACTIVE`
+- `POSTGRES_JDBC_URL` (user & song services)
+- `USER_SERVICE_BASE_URL` (auth)
+- `AUTH_SERVICE_BASE_URL`, `USER_SERVICE_BASE_URL`, `SONG_SERVICE_BASE_URL` (gateway)
+- `FRONTEND_URL` (gateway)
+
+**Frontends** default to `NODE_ENV=production`.
+
+---
+
+## 📦 (Optional) Docker Compose Reference
+
+Use the `docker-compose.yml` present in root directory to quickly spin up all services and dependencies:
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
-
----
+Contributions are welcome! Please fork the repository, build and test locally, then submit a pull request.
 
 ## 📄 License
 
@@ -122,5 +261,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 📬 Contact
 
-For any questions or feedback, feel free to reach out at:  
-📧 [vgworks566556@gmail.com](mailto:vgworks566556@gmail.com)
+For questions or feedback: [vgworks566556@gmail.com](mailto:vgworks566556@gmail.com)
