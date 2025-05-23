@@ -39,6 +39,7 @@ Commands below are grouped by OS where syntax differs.
 2. Create database and user:
 
    **macOS/Linux (psql):**
+
    ```bash
    psql -U postgres
    CREATE DATABASE rhythmix;
@@ -47,6 +48,7 @@ Commands below are grouped by OS where syntax differs.
    ```
 
    **Windows (PowerShell):**
+
    ```powershell
    psql -U postgres
    CREATE DATABASE rhythmix;
@@ -59,6 +61,14 @@ Commands below are grouped by OS where syntax differs.
 ---
 
 ## 🏗️ Build & Run Backend Services
+
+Maven, Dotnet is required to build backend services:
+
+```bash
+brew install maven
+
+brew install dotnet@8
+```
 
 Services live under `backend/`:
 
@@ -74,6 +84,7 @@ backend/
 ### 1. Config Server
 
 **macOS/Linux**
+
 ```bash
 cd backend/rhythmix-config-server
 mvn clean package -DskipTests
@@ -81,6 +92,7 @@ java -jar target/*.jar --server.port=8888
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd backend\rhythmix-config-server
 mvn clean package -DskipTests
@@ -92,6 +104,7 @@ _Health endpoint: http://localhost:8888/actuator/health_
 ### 2. Auth Service
 
 **macOS/Linux**
+
 ```bash
 cd backend/rhythmix-auth-service
 mvn clean package -DskipTests
@@ -102,6 +115,7 @@ java -jar target/*.jar --server.port=8100
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd backend\rhythmix-auth-service
 mvn clean package -DskipTests
@@ -114,30 +128,35 @@ java -jar target\*.jar --server.port=8100
 ### 3. User Service
 
 **macOS/Linux**
+
 ```bash
 cd backend/rhythmix-user-services
-mvn clean package -DskipTests
-export POSTGRES_JDBC_URL=jdbc:postgresql://rhythmix-postgres:5432/rhythmix
+dotnet restore
+dotnet publish -c Release -o out
+export POSTGRES_CONNECTION_STRING=Host=rhythmix-postgres;Port=5432;Database=rhythmix;Username=your_user;Password=your_password
 export SPRING__CLOUD__CONFIG__URI=http://rhythmix-config-server:8888
 export SPRING__PROFILES__ACTIVE=Production
 export ASPNETCORE_ENVIRONMENT=Production
-java -jar target/*.jar --server.port=8080
+dotnet out/rhythmix_user_services.dll "--urls=http://*:8080"
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd backend\rhythmix-user-services
-mvn clean package -DskipTests
-$Env:SPRING__CLOUD__CONFIG__URI = 'http://localhost:8888'
-$Env:SPRING__PROFILES__ACTIVE = 'Production'
-$Env:POSTGRES_JDBC_URL = 'jdbc:postgresql://localhost:5432/rhythmix'
-$Env:ASPNETCORE_ENVIRONMENT=Production
-java -jar target\*.jar --server.port=8080
+dotnet restore
+dotnet publish -c Release -o out
+$Env:POSTGRES_CONNECTION_STRING= 'Host=rhythmix-postgres;Port=5432;Database=rhythmix;Username=your_user;Password=your_password'
+$Env:SPRING__CLOUD__CONFIG__URI= 'http://rhythmix-config-server:8888'
+$Env:SPRING__PROFILES__ACTIVE= 'Production'
+$Env:ASPNETCORE_ENVIRONMENT= 'Production'
+dotnet out/rhythmix_user_services.dll --urls=http://*:8080
 ```
 
 ### 4. Song Service
 
 **macOS/Linux**
+
 ```bash
 cd backend/rhythmix-song-service
 mvn clean package -DskipTests
@@ -148,6 +167,7 @@ java -jar target/*.jar --server.port=8200
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd backend\rhythmix-song-service
 mvn clean package -DskipTests
@@ -160,6 +180,7 @@ java -jar target\*.jar --server.port=8200
 ### 5. Gateway (Routing)
 
 **macOS/Linux**
+
 ```bash
 cd backend/rhythmix-gateway
 mvn clean package -DskipTests
@@ -174,6 +195,7 @@ java -jar target/*.jar --server.port=8761
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd backend\rhythmix-gateway
 mvn clean package -DskipTests
@@ -204,6 +226,7 @@ frontend/
 For each app, replace `<folder>` and `<port>` accordingly:
 
 **macOS/Linux**
+
 ```bash
 cd frontend/<folder>
 npm install
@@ -212,6 +235,7 @@ npx serve -s dist -l <port>
 ```
 
 **Windows (PowerShell)**
+
 ```powershell
 cd frontend\<folder>
 npm install
@@ -219,12 +243,12 @@ npm run build
 npx serve -s dist -l <port>
 ```
 
-| App               | Folder                 | Port  |
-|-------------------|------------------------|-------|
-| Home Web          | `rhythmix-home-web`    | 3002  |
-| Library Web       | `rhythmix-library-web` | 3001  |
-| Player Web        | `rhythmix-player-web`  | 3000  |
-| Main Portal (Web) | `rhythmix-web`         | 5173  |
+| App               | Folder                 | Port |
+| ----------------- | ---------------------- | ---- |
+| Home Web          | `rhythmix-home-web`    | 3002 |
+| Library Web       | `rhythmix-library-web` | 3001 |
+| Player Web        | `rhythmix-player-web`  | 3000 |
+| Main Portal (Web) | `rhythmix-web`         | 5173 |
 
 ---
 
