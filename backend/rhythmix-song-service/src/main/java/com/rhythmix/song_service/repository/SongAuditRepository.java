@@ -11,9 +11,9 @@ import java.util.UUID;
 @Repository
 public interface SongAuditRepository extends JpaRepository<SongAudit, BigDecimal> {
 
-    List<SongAudit> findTop10ByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<SongAudit> findTop10ByUserNameOrderByCreatedAtDesc(String userName);
 
-    long countByUserId(UUID userId);
+    long countByUserName(String userName);
 
-    void deleteFirstByUserIdOrderByCreatedAtAsc(UUID userId);
+    void deleteFirstByUserNameOrderByCreatedAtAsc(String userName);
 }

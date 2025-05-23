@@ -98,3 +98,6 @@ textarea::placeholder {
   object-fit: cover;     /* maintains aspect, crops excess */
 }
 
+.image-container img {
+  transition: opacity 0.3s ease-in-out;
+}

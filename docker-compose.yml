@@ -34,8 +34,14 @@ services:
   rhythmix-web:
     container_name: rhythmix-web
     depends_on:
-      - rhythmix-home-web
-      - rhythmix-library-web
+      rhythmix-home-web:
+        condition: service_started
+      rhythmix-library-web:
+        condition: service_started
+      rhythmix-player-web:
+        condition: service_started
+      rhythmix-config-server:
+        condition: service_healthy
     build:
       context: ./frontend/rhythmix-web
       dockerfile: Dockerfile
@@ -73,7 +79,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 15s
 
   rhythmix-auth-service:
     container_name: rhythmix-auth-service
@@ -149,6 +154,7 @@ services:
       - rhythmix_auth_service_url=http://rhythmix-auth-service:8100
       - rhythmix_user_service_url=http://rhythmix-user-services:8080
       - rhythmix_song_service_url=http://rhythmix-song-service:8200
+      - AUTH_SERVICE_BASE_URL=http://rhythmix-auth-service:8100/auth
       - CONFIG_SERVER_URL=http://rhythmix-config-server:8888
       - SPRING_PROFILES_ACTIVE=dev
       - FRONTEND_URL=http://localhost:5173

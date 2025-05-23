@@ -11,6 +11,7 @@ declare module 'container/musicPlayer' {
     isPlaying: boolean;
     isShuffling: boolean;
     isRepeating: boolean;
+    isLoading: boolean;
     volume: number;
   }
 
@@ -43,8 +44,39 @@ declare module 'container/musicPlayer' {
   export const useMusicPlayerStore: UseMusicPlayerStore;
 }
 
-declare module 'container/MockedMusic' {
-  import type { SongMetadata } from './model';
-  const trackList: SongMetadata[];
-  export default trackList;
+declare module 'container/backendService' {
+  export interface ServerResponse {
+    status: number;
+    data: any;
+  }
+  export interface AddToPlaylistDto {
+    userName: string;
+    playlistName: string;
+    songId: string;
+  }
+
+  export declare const getSongs: (keyword: string) => Promise<ServerResponse>;
+
+  export declare const getRecentlyPlayedSongs: () => Promise<ServerResponse>;
+
+  export declare const auditSong : (songId: string) => Promise<ServerResponse>;
+
+  export declare const getSongsByPreference : (preferenceType:string) => Promise<ServerResponse>;
+
+  export declare const getUser: () => any;
+
+  export declare const getPlaylistSongs: (playlistName: string) => Promise<ServerResponse>;
+
+  export declare const likeSong: (songId: string) => Promise<ServerResponse>;
+
+  export declare const unlikeSong: (songId: string) => Promise<ServerResponse>;
+
+  export declare const getUserPlaylists: () => Promise<ServerResponse>;
+
+  export declare const addSongToPlaylist: (dtp:AddToPlaylistDto) => Promise<ServerResponse>;
+
+  export declare const deletePlaylist: (playlistName: string) => Promise<ServerResponse>;
+
+  export declare const deleteSongFromPlaylist: (playlistName: string, songId: numberq) => Promise<ServerResponse>;
+
 }

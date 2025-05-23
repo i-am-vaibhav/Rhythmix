@@ -1,5 +1,5 @@
 // src/components/Dashboard.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useAuthStore } from 'container/AuthStore';
 import { Navigate } from 'react-router-dom';
@@ -11,23 +11,168 @@ import {
   InputGroup,
   FormControl,
   Button,
+  Spinner,
 } from 'react-bootstrap';
-import { FaSearch, FaPlay, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaPlay } from 'react-icons/fa';
 import type { SongMetadata } from '../model';
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
+import { addSongToPlaylist, getPlaylistSongs, getRecentlyPlayedSongs, getSongs, getSongsByPreference, getUserPlaylists, likeSong, unlikeSong } from 'container/backendService';
 import FooterMusicPlayer from './FooterMusicPlayer';
+import { MdRefresh } from 'react-icons/md';
+import SongActionMenu from './SongActionMenu';
 
-interface DashboardProps {
-  queue: SongMetadata[];
+export interface Playlist {
+  coverArt:string,
+  songs:SongMetadata[],
+  title:string
 }
-
-const Dashboard: React.FC<DashboardProps> = ({ queue }) => {
+const Dashboard: React.FC = () => {
   const { userData } = useAuthStore();
   if (!userData) return <Navigate to="/" />;
 
-  const recent: SongMetadata[] = [...queue];
-  const recommended: SongMetadata[] = [...queue];
-  const newReleases: SongMetadata[] = [...queue];
+  const [recent, setRecent] = useState<SongMetadata[]>([]);
+  const [recommended, setRecommended] = useState<Playlist[]>([]);
+  const [recentLoading,setRecentLoading] = useState(false);
+  const [recommendedLoading,setRecommendedLoading] = useState(false);
+
+  const capitalizeFirst = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+  const fetchRecentlyPlayedSongs = async () => {
+    setRecentLoading(true);
+    try {
+      const response = await getRecentlyPlayedSongs();
+      if (response.status === 200) {
+        const songs = response.data;
+        const newSongs:SongMetadata[]  = [];
+        songs.forEach((song: SongMetadata) => {
+          newSongs.push(song);
+        });
+        const isChanged: boolean = JSON.stringify(songs.map((s: SongMetadata) => s.id)) !== JSON.stringify(recent.map((s: SongMetadata) => s.id));
+        if (isChanged) {
+          setRecent(songs);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recently played songs:', error);
+    }finally {
+      setRecentLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (document.visibilityState === 'visible') {
+      fetchRecentlyPlayedSongs();
+    }
+  }, []);
+
+  const [likedSongIds, setLikedSongIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchLikedSongs = async () => {
+      try {
+        const response = await getPlaylistSongs('liked');
+        if (response.status === 200) {
+          const songs = response.data;
+          const songIds = new Set<string>();
+          songs.forEach((song: SongMetadata) => {
+            songIds.add(song.id);
+          });
+          if (mounted) setLikedSongIds(songIds);
+        }
+      } catch (error) {
+        console.error('Error fetching liked songs:', error);
+      }
+    };  
+    fetchLikedSongs();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const isLiked = (songId: string): boolean => !!songId && likedSongIds.has(songId);
+
+  const toggleLike = async (songId: string): Promise<void> => {
+    if (!songId) return;
+    console.log('Toggling like for song:', songId);
+    const updated = new Set(likedSongIds);
+    const alreadyLiked = updated.has(songId);
+
+    alreadyLiked ? updated.delete(songId) : updated.add(songId);
+    setLikedSongIds(new Set(updated));
+    try {
+      if (alreadyLiked) {
+        await unlikeSong(songId);
+        console.log('Song unliked:', songId);
+      } else {
+        await likeSong(songId);
+        console.log('Song liked:', songId);
+      }
+    } catch (err) {
+      console.error("Like toggle failed", err);
+      alreadyLiked ? updated.add(songId) : updated.delete(songId);
+      setLikedSongIds(new Set(updated));
+    }
+  };
+
+  useEffect(() => {
+    const types: string[] = ['ARTIST','LANGUAGE','GENRE'];
+    setRecommendedLoading(true);
+    let mounted = true;
+    Promise.all(types.map(t => getSongsByPreference(t)))
+      .then(responses => {
+        const lists = responses.flatMap(r => {
+          if (r.status !== 200 || typeof r.data !== 'object') return [];
+          return Object.entries(r.data).map(([key, arr]) => {
+            if (!Array.isArray(arr) || arr.length === 0) return null;
+            const random = arr[Math.floor(Math.random()*arr.length)];
+            return {
+              title: `${capitalizeFirst(key)} Mix`,
+              coverArt: random.coverArt,
+              songs: arr as SongMetadata[],
+            };
+          }).filter(Boolean) as Playlist[];
+        });
+        setRecommended(lists);
+      })
+      .catch(err => {
+        console.error(err);
+      })
+      .finally(() => {
+        if (mounted) setRecommendedLoading(false);
+      });
+    return () => {mounted = false};
+  }, []);
+
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchResults, setSearchResults] = useState<SongMetadata[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // a little debounce timer
+  useEffect(() => {
+    if (!searchKeyword) {
+      setSearchResults([]);
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const { status, data } = await getSongs(searchKeyword);
+        if (status === 200 && Array.isArray(data.content)) {
+          setSearchResults(data.content);
+        } else {
+          setSearchResults([]);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(handle);
+  }, [searchKeyword]);
 
   return (
     <>
@@ -37,14 +182,30 @@ const Dashboard: React.FC<DashboardProps> = ({ queue }) => {
           <h3>Welcome back, {userData.userName}!</h3>
           <InputGroup style={{ maxWidth: 300 }}>
             <InputGroup.Text><FaSearch /></InputGroup.Text>
-            <FormControl placeholder="Search music" aria-label="Search music" />
+            <FormControl
+              placeholder="Search music, artist, album..."
+              aria-label="Search music, artist, album..."
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+            />
           </InputGroup>
         </div>
 
+        {searchKeyword && (
+          <Section
+            title={`Search: "${searchKeyword}"`}
+            items={searchResults}
+            grid
+            loader={searchLoading}
+            isLiked={isLiked}
+            toggleLike={toggleLike}
+          />
+        )}
         {/* Sections */}
-        <Section title="Recently Played" items={recent} />
-        <Section title="Recommended Playlists" items={recommended} grid />
-        <Section title="New Releases" items={newReleases} grid />
+        <Section title="Recommended Playlists" playlist={recommended} grid loader={recommendedLoading} />
+        <Section title="Recently Played" items={recent} grid loader={recentLoading} showRefresh refresh={fetchRecentlyPlayedSongs} 
+            isLiked={isLiked}
+            toggleLike={toggleLike}/>
       </Container>
       <Row>
         <FooterMusicPlayer musicPlayerNavigationUrl='/player/music' />
@@ -55,22 +216,52 @@ const Dashboard: React.FC<DashboardProps> = ({ queue }) => {
 
 interface SectionProps {
   title: string;
-  items: SongMetadata[];
+  items?: SongMetadata[];
+  playlist?: Playlist[];
   grid?: boolean;
+  loader: boolean;
+  showRefresh?: boolean;
+  refresh?: () => void;
+  isLiked?: (songId: string) => boolean;
+  toggleLike?: (songId: string) => Promise<void>;
 }
 
-const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
+const Section: React.FC<SectionProps> = ({ title, items, playlist, grid, loader, showRefresh, refresh, isLiked, toggleLike }) => {
   const addSongToQueue = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.addSongToQueue
   );
   const playTrackSong = useMusicPlayerStore(
     (state: UseMusicPlayerStore) => state.playTrackSong
   );
+  const clearQueue = useMusicPlayerStore(
+    (state: UseMusicPlayerStore) => state.clearQueue
+  );
+  const stop = useMusicPlayerStore(
+    (state: UseMusicPlayerStore) => state.stop
+  );
+
+  const playPlayList = async (songs: SongMetadata[]) => {
+    for (const track of songs) {
+      addSongToQueue(track);
+    }
+  }
+
+  const spinner = (
+    <Col xs={12} className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+      <Spinner animation="border" role="status" variant="primary" />
+      <span className="visually-hidden">Loading...</span>
+    </Col>
+  );
 
   return (
     <section className="mb-5">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold mb-0">{title}</h5>
+        <h4 className="fw-bold mb-0">{title}</h4>
+        {showRefresh && <div className="d-flex ms-auto">
+          <Button
+            variant="primary"
+            className="shadow-lg mb-4" onClick={refresh}> <MdRefresh></MdRefresh> </Button>
+        </div>}
       </div>
       <Row
         className={
@@ -79,14 +270,15 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
             : 'flex-nowrap overflow-auto'
         }
       >
-        {items.map((item) => (
+          {loader && spinner}
+          {!loader && items && items.length>0 && items.map((item) => (
           <Col key={item.id} className="d-flex">
             <Card className="music-card h-100 border-0 shadow-sm">
               <div className="position-relative image-container">
                 <Card.Img
                   src={item.coverArt}
                   alt={item.title}
-                  className="rounded-top"
+                  className="rounded-top fade-in"
                   style={{objectFit:'cover'}}
                 />
                 <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
@@ -100,13 +292,14 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
                     >
                       <FaPlay />
                     </Button>
-                    <Button
-                      variant="light"
-                      className="rounded-circle p-3 m-4 shadow-lg"
-                      onClick={() => addSongToQueue(item)}
-                    >
-                      <FaPlus />
-                    </Button>
+                    <SongActionMenu
+                            song={item}
+                            addSongToQueue={() => addSongToQueue(item)}
+                            toggleLike={toggleLike ?? (async () => {})}
+                            isLiked={isLiked ?? (() => false)}
+                            addSongToPlaylist={addSongToPlaylist}
+                            getUserPlaylists={getUserPlaylists}
+                        />
                   </div>
                   <div className="text-center d-flex flex-column justify-content-between">
                     <div className="text-light mb-1 fs-6 text-truncate">
@@ -116,6 +309,40 @@ const Section: React.FC<SectionProps> = ({ title, items, grid }) => {
                       {item.artist}
                     </div>
                 </div>
+                </Card.ImgOverlay>
+              </div>
+            </Card>
+          </Col>
+        ))}
+        {!loader && playlist && playlist.length > 0 && playlist.map((item,index) => (
+          <Col key={index} className="d-flex">
+            <Card className="music-card h-100 border-0 shadow-sm">
+              <div className="position-relative image-container">
+                <Card.Img
+                  src={item.coverArt}
+                  alt={item.title}
+                  className="rounded-top fade-in"
+                  style={{objectFit:'cover'}}
+                />
+                <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
+                  <div className="m-2 d-flex opacity-75">
+                    <Button
+                      variant="light"
+                      className="rounded-circle p-3 m-4 shadow-lg"
+                      onClick={async () => {
+                        stop();
+                        clearQueue();
+                        await playPlayList(item.songs);
+                      }}
+                    >
+                      <FaPlay />
+                    </Button>
+                  </div>
+                  <div className="text-center d-flex flex-column justify-content-between">
+                    <div className="text-light mb-1 fs-6 text-truncate">
+                      {item.title}
+                    </div>
+                  </div>
                 </Card.ImgOverlay>
               </div>
             </Card>

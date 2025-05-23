@@ -19,7 +19,7 @@ interface SignupStore {
   formData: SignupFormData;
   message: string;
   setFormData: (data: Partial<SignupFormData>) => void;
-  registerUser: () => Promise<boolean>;
+  registerUser: () => Promise<any>;
   resetForm: () => void;
 }
 
@@ -45,19 +45,10 @@ export const useSignupStore = create<SignupStore>((set,get) => ({
   registerUser: async () => {
     const { formData } = get();
     const response: ServerResponse = await register(formData);
-    console.log(response);
-    if(response.status == 201){
-      set({
-        message: "User registered successfully with " + response.data.userId,
-      });
-      return true;
-    } else {
-      set({
-        message: response.data.status,
-      })
-      return false;
+    if (response.status == 201){
+      localStorage.setItem("userToken", JSON.stringify(response.data));
     }
-    
+    return response;
   },
 
   resetForm: () => set({

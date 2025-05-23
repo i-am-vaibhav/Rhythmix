@@ -4,7 +4,7 @@ export interface LyricsLine {
 }
 
 export interface SongMetadata {
-  id?: string;
+  id: string;
   title: string;
   artist: string;
   album: string;
@@ -12,3 +12,10 @@ export interface SongMetadata {
   url: string;
   lyrics: LyricsLine[];
 }
+
+
+export interface Playlist {
+  id: string;
+  name: string;
+  tracks: SongMetadata[];
+};

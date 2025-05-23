@@ -8,14 +8,16 @@ import com.rhythmix.song_service.model.SongAudit;
 import com.rhythmix.song_service.repository.SongAuditRepository;
 import com.rhythmix.song_service.repository.SongRepository;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @Service
 public class SongServiceImpl implements SongService {
@@ -29,64 +31,76 @@ public class SongServiceImpl implements SongService {
 
     private final SongConverter songConverter = Mappers.getMapper(SongConverter.class);
 
-    public SongServiceImpl(SongRepository songRepository, SongAuditRepository songAuditRepository) {
+    private final NativeQueryService nativeQueryService;
+
+    public SongServiceImpl(SongRepository songRepository, SongAuditRepository songAuditRepository, NativeQueryService nativeQueryService) {
         this.songRepository = songRepository;
         this.songAuditRepository = songAuditRepository;
+        this.nativeQueryService = nativeQueryService;
     }
 
     @Override
-    public Page<Song> getPlaylistSongs(String playlistName, int page, int pageSize) {
+    public List<Song> getPlaylistSongs(String playlistName, String userName, int page, int pageSize) {
         if (LIKED.equals(playlistName)) {
-            return songRepository.findLikedSongs(PageRequest.of(page, pageSize))
-                    .map(songConverter::toDto);
+            return nativeQueryService.findLikedSongs(userName)
+                    .stream().map(songConverter::toDto).toList();
         }
-        return songRepository.findSongsByPlaylistName(playlistName, PageRequest.of(page, pageSize))
-                .map(songConverter::toDto);
+        return nativeQueryService.findSongsByPlaylist(playlistName, userName)
+                .stream().map(songConverter::toDto).toList();
     }
 
     @Override
-    public Page<Song> getSongsByPreferences(
-            String preference, PreferenceType preferenceType, int page, int pageSize
+    public Map<String,List<Song>> getSongsByPreferences(
+            String preference, PreferenceType preferenceType
     ) {
-        Page<Song> songs = null;
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Map<String,List<Song>> songs = new HashMap<>();
+        List<String> preferences = Arrays.stream(preference.toLowerCase().split(",")).toList();
         if (preferenceType.equals(PreferenceType.LANGUAGE)) {
-            songs = songRepository.findByLanguageContainingIgnoreCase(preference, pageable)
-                    .map(songConverter::toDto);
+            preferences.forEach((pref) -> {
+                songs.put(pref,songRepository.findByLanguageContainingIgnoreCase(pref)
+                        .stream().map(songConverter::toDto).toList());
+            });
         } else if (preferenceType.equals(PreferenceType.GENRE)) {
-            songs = songRepository.findByGenreContainingIgnoreCase(preference, pageable)
-                    .map(songConverter::toDto);
+            preferences.forEach((pref) -> {
+                songs.put(pref,songRepository.findByGenreContainingIgnoreCase(pref)
+                        .stream().map(songConverter::toDto).toList());
+            });
         } else if (preferenceType.equals(PreferenceType.ARTIST)) {
-            List<String> artists = Arrays.stream(preference.toLowerCase().split(",")).toList();
-            songs = songRepository.
-                    findByArtistIn(artists, pageable).map(songConverter::toDto);
+            preferences.forEach((pref) -> {
+                songs.put(pref,songRepository.findByArtistContainingIgnoreCase(pref)
+                        .stream().map(songConverter::toDto).toList());
+            });
         }
         return songs;
     }
 
     @Override
-    public Page<Song> getSongs(int page, int pageSize) {
-        return songRepository.findAll(PageRequest.of(page, pageSize))
+    public Page<Song> getSongs(String keyword, int page, int pageSize) {
+        Song song = Song.builder().album(keyword).artist(keyword).genre(keyword).title(keyword).build();
+        Example<com.rhythmix.song_service.model.Song> songExample = Example.of(songConverter.toEntity(song),
+                ExampleMatcher.matchingAny().withIgnoreNullValues().withIgnoreCase()
+                        .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING));
+        return songRepository.findAll(songExample,PageRequest.of(page, pageSize))
                 .map(songConverter::toDto);
     }
 
     @Override
-    public List<Song> getRecentlyPlayedSongs(UUID userId) {
-        return songAuditRepository.findTop10ByUserIdOrderByCreatedAtDesc(userId)
+    public List<Song> getRecentlyPlayedSongs(String userName) {
+        return songAuditRepository.findTop10ByUserNameOrderByCreatedAtDesc(userName)
                 .stream().map(songAudit -> songConverter.toDto(songAudit.getSong()))
                 .distinct().toList();
     }
 
     @Override
     public void auditSong(SongAuditRequest songAuditRequest) {
-        UUID userId = songAuditRequest.userId();
-        long auditCount = songAuditRepository.countByUserId(userId);
+        String userName = songAuditRequest.userName();
+        long auditCount = songAuditRepository.countByUserName(userName);
         if (auditCount > 9){
-            songAuditRepository.deleteFirstByUserIdOrderByCreatedAtAsc(userId);
+            songAuditRepository.deleteFirstByUserNameOrderByCreatedAtAsc(userName);
         }
         SongAudit songAudit = SongAudit.builder()
                 .song(songRepository.getReferenceById(songAuditRequest.songId()))
-                .userId(userId).build();
+                .userName(userName).build();
         songAuditRepository.save(songAudit);
     }
 }

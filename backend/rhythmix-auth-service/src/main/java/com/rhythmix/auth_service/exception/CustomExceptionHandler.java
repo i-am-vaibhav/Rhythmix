@@ -39,4 +39,30 @@ public class CustomExceptionHandler {
         return ExceptionResponse.builder().status(e.getMessage()).build();
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(RuntimeException.class)
+    public ExceptionResponse runtimeException(RuntimeException e){
+        return ExceptionResponse.builder().status(e.getMessage()).build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidUserInputException.class)
+    public ExceptionResponse invalidUserInputException(InvalidUserInputException e){
+        return ExceptionResponse.builder().status(e.getMessage()).build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ExceptionResponse userAlreadyExistsException(UserAlreadyExistsException e){
+        return ExceptionResponse.builder().status(e.getMessage()).build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserNotFoundException.class)
+    public ExceptionResponse userNotFoundException(UserNotFoundException e){
+        return ExceptionResponse.builder().status(e.getMessage()).build();
+    }
+
+
+
 }

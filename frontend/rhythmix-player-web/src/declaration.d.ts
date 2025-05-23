@@ -12,6 +12,7 @@ declare module 'container/musicPlayer' {
     isShuffling: boolean;
     isRepeating: boolean;
     volume: number;
+    isLoading: boolean;
   }
 
   export interface MusicPlayerActions {

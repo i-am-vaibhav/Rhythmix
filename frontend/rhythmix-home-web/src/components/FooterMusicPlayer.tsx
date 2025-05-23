@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, ProgressBar, Form, Row, Col, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import { FaPlay, FaPause, FaListUl } from 'react-icons/fa';
 import { FaBackward, FaForward, FaMaximize, FaRepeat, FaShuffle } from 'react-icons/fa6';
 import type { SongMetadata } from '../model.ts'
@@ -32,6 +32,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const playPreviousTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playPreviousTrack);
   const playNextTrack = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playNextTrack);
   const currentTrackIndex = useMusicPlayerStore((state:UseMusicPlayerStore) => state.currentTrackIndex);
+  const isLoading = useMusicPlayerStore((state:UseMusicPlayerStore) => state.isLoading);
 
   const songMetadata: SongMetadata = getCurrentSong() || { 
     coverArt: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1BhBgvAdx2cQwiyvb-89VbGVzgQbB983tfw&s', 
@@ -45,8 +46,6 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const duration = getCurrentSongDuration();
   const [showQueue, setShowQueue] = useState(false);
-  const [shuffle, setShuffle] = useState(isShuffling);
-  const [repeat, setRepeat] = useState(isRepeating);
   const navigate = useNavigate();
 
   const changeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,7 +109,7 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
       <div className={styles['footer-inner-container']}>
         <Row className="align-items-center w-100">
           <Col md={3} className="d-flex align-items-center">
-            <img src={songMetadata.coverArt} alt="Cover" className={`${styles['card-img']} me-3`} />
+            <img src={songMetadata.coverArt} alt="Cover" className={`${styles['card-img']} me-3 fade-in`} />
             <div>
               <div className={styles['card-title']}>{songMetadata.title}</div>
               <div className={styles['card-text']}>{songMetadata.artist}</div>
@@ -126,25 +125,23 @@ const FooterMusicPlayer: React.FC<FooterMusicPlayerProps> = ({
             </div>
           </Col>
           <Col md={2} className="d-flex align-items-center justify-content-center gap-2">
-            <Button disabled={queue.length==0} variant={shuffle ? 'primary' : 'outline-light'} onClick={() => {
-              setShuffle(!shuffle);
+            <Button disabled={queue.length==0} variant={isShuffling ? 'primary' : 'outline-light'} onClick={() => {
               toggleShuffle();
-            }} className={styles['btn-rounded-circle']}>
+            }} className={isShuffling ? styles['btn-rounded-circle bg-success'] : styles['btn-rounded-circle']} >
               <FaShuffle />
             </Button>
             <Button disabled={queue.length==0 || currentTrackIndex == 0}  onClick={() => playPreviousTrack()} className={styles['btn-rounded-circle']}>
               <FaBackward/>
             </Button>
-            <Button disabled={queue.length==0} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
-              {isPlaying ? <FaPause /> : <FaPlay />}
+            <Button disabled={queue.length==0 || isLoading} onClick={togglePlayPause} className={styles['btn-rounded-circle']}>
+              {isLoading ? <Spinner animation="border" size="sm" variant="light" /> : (isPlaying ? <FaPause /> : <FaPlay />)}
             </Button>
             <Button disabled={queue.length == currentTrackIndex+1}  onClick={() => playNextTrack()} className={styles['btn-rounded-circle']}>
               <FaForward/>
             </Button>
-            <Button disabled={queue.length==0} variant={repeat ? 'primary' : 'outline-light'} onClick={() => {
+            <Button disabled={queue.length==0} variant={isRepeating ? 'primary' : 'outline-light'} onClick={() => {
               toggleRepeat();
-              setRepeat(!repeat);
-            }} className={styles['btn-rounded-circle']}>
+            }} className={isRepeating ? styles['btn-rounded-circle bg-success'] : styles['btn-rounded-circle']} >
               <FaRepeat />
             </Button>
           </Col>

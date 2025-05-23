@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/songs")
@@ -21,45 +21,45 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping
+    @GetMapping("/search/{keyword}")
     public ResponseEntity<Page<Song>> songs(
+            @PathVariable(name = "keyword") String keyword,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "0") int page
     ) {
         return ResponseEntity.ok(
-                songService.getSongs(page, pageSize)
+                songService.getSongs(keyword,page, pageSize)
         );
     }
 
-    @GetMapping("/{playlistName}")
-    public ResponseEntity<Page<Song>> playlistSongs(
-            @PathVariable(name = "playlistName", value = "liked") String playlistName,
+    @GetMapping("/playlist/{playlistName}")
+    public ResponseEntity<List<Song>> playlistSongs(
+            @PathVariable(name = "playlistName") String playlistName,
+            @RequestHeader(name = "AuthUsername") String userName,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "0") int page
     ) {
         return ResponseEntity.ok(
-                songService.getPlaylistSongs(playlistName, page, pageSize)
+                songService.getPlaylistSongs(playlistName, userName, page, pageSize)
         );
     }
 
     @GetMapping("/{preferenceType}/{preference}")
-    public ResponseEntity<Page<Song>> songsByPreference(
+    public ResponseEntity<Map<String,List<Song>>> songsByPreference(
             @PathVariable(name = "preferenceType") PreferenceType preferenceType,
-            @PathVariable(name = "preference") String preference,
-            @RequestParam(required = false, defaultValue = "10") int pageSize,
-            @RequestParam(required = false, defaultValue = "0") int page
+            @PathVariable(name = "preference") String preference
     ) {
         return ResponseEntity.ok(
-                songService.getSongsByPreferences(preference, preferenceType, page, pageSize)
+                songService.getSongsByPreferences(preference, preferenceType)
         );
     }
 
-    @GetMapping("/recently-played/{userId}")
+    @GetMapping("/recently-played")
     public ResponseEntity<List<Song>> recentlyPlayedSongs(
-            @PathVariable(name = "userId") UUID userId
+            @RequestHeader(name = "AuthUsername") String userName
             ){
         return ResponseEntity.ok(
-                songService.getRecentlyPlayedSongs(userId)
+                songService.getRecentlyPlayedSongs(userName)
         );
     }
 

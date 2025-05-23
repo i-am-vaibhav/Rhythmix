@@ -1,26 +1,73 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, InputGroup, ButtonGroup, Spinner, ListGroup } from 'react-bootstrap';
 import { FaSearch, FaPlay } from 'react-icons/fa';
 import FooterMusicPlayer from './FooterMusicPlayer';
-import trackList from "container/MockedMusic";
 import { useMusicPlayerStore, type UseMusicPlayerStore } from 'container/musicPlayer';
-import { MdLibraryMusic } from 'react-icons/md';
-import { FaPlus } from 'react-icons/fa6';
-
-const mockTracks = [ 
-  ...trackList
-];
-
-const mockPlaylists = [
-  { id: 'liked', name: 'Liked Songs', tracks: mockTracks },
-  { id: 'playlist1', name: 'Chill Vibes', tracks: [mockTracks[0], mockTracks[5], mockTracks[6]] },
-  { id: 'playlist2', name: 'Party Mix', tracks: [mockTracks[1], mockTracks[4], mockTracks[2],mockTracks[3]] },
-];
+import { MdLibraryMusic, MdRefresh } from 'react-icons/md';
+import type { Playlist, SongMetadata } from '../model';
+import { addSongToPlaylist, deletePlaylist, deleteSongFromPlaylist, getPlaylistSongs, getRecentlyPlayedSongs, getUserPlaylists, likeSong, unlikeSong, type AddToPlaylistDto, type ServerResponse } from 'container/backendService';
+import SongActionMenu from './SongActionMenu';
+import { FaDeleteLeft } from 'react-icons/fa6';
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [selectedPlaylist, setSelectedPlaylist] = useState('liked');
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [likedSongIds, setLikedSongIds] = useState<Set<string>>(new Set());
+
+  const [loadingPlaylists, setLoadingPlaylists] = useState(true);
+
+  const fetchPlaylists = async () => {
+      setLoadingPlaylists(true);
+      const likedPlaylist: Playlist = {
+        id: 'liked',
+        name: 'Liked Songs',  
+        tracks: [],
+      }
+      likedPlaylist.tracks = await getPlaylistSongs('liked').then((response: ServerResponse) => {
+        if (response.status == 200){
+          const songs = response.data;
+          const songIds = new Set<string>();
+          songs.forEach((song: SongMetadata) => {
+            songIds.add(song.id);
+          });
+          setLikedSongIds(songIds);
+          return songs;
+        }
+        return [];
+      });
+      setPlaylists([likedPlaylist]);
+      try {
+        getUserPlaylists().then(async (response: ServerResponse) => {
+          if (response.status == 200) {
+            const fetchedPlaylists: Playlist[] = await Promise.all(
+              response.data.map(async (pl: string) => {
+                const tracks: SongMetadata[] = await getPlaylistSongs(pl).then((response: ServerResponse) => {
+                  if (response.status == 200) return response.data;
+                  return [];
+                });
+                return {
+                  id: pl,
+                  name: pl,
+                  tracks: tracks,
+                };
+              })
+            );
+            setPlaylists((prev) => [...prev, ...fetchedPlaylists]);
+          }
+        })
+      } catch (error) {
+        console.error('Error fetching playlists:', error);
+      }finally {  
+        setLoadingPlaylists(false);
+      }
+  };
+
+  useEffect(() => {
+    fetchPlaylists();
+  }, []);
+  
 
   const playTrackSong = useMusicPlayerStore((state:UseMusicPlayerStore) => state.playTrackSong);
 
@@ -31,7 +78,7 @@ const Dashboard = () => {
   const stop = useMusicPlayerStore((state:UseMusicPlayerStore) => state.stop);
 
   // Find currently selected playlist
-  const currentPlaylist = mockPlaylists.find(pl => pl.id === selectedPlaylist) || mockPlaylists[0];
+  const currentPlaylist = playlists.find(pl => pl.id === selectedPlaylist) || playlists[0] || { id: '', name: '', tracks: [] };
 
   // Filter tracks by search within playlist
   const displayedTracks = currentPlaylist.tracks.filter(
@@ -40,12 +87,136 @@ const Dashboard = () => {
       track.artist.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const [recent, setRecent] = useState([]);
+  const [recentLoading,setRecentLoading] = useState(false);
+
+  const fetchRecentlyPlayedSongs = async () => {
+    setRecentLoading(true);
+    try {
+      const response = await getRecentlyPlayedSongs();
+      if (response.status === 200) {
+        const songs = response.data;
+        const newSongs:SongMetadata[]  = [];
+        songs.forEach((song: SongMetadata) => {
+          newSongs.push(song);
+        });
+        const isChanged: boolean = JSON.stringify(songs.map((s: SongMetadata) => s.id)) !== JSON.stringify(recent.map((s: SongMetadata) => s.id));
+        if (isChanged) {
+          setRecent(songs);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recently played songs:', error);
+    }finally {
+      setRecentLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (document.visibilityState === 'visible') {
+      fetchRecentlyPlayedSongs();
+    }
+  }, []);
+
+  const isLiked = (songId?: string): boolean => !!songId && likedSongIds.has(songId);
+
+  const toggleLike = async (songId?: string) => {
+    if (!songId) return;
+    console.log('Toggling like for song:', songId);
+    const updated = new Set(likedSongIds);
+    const alreadyLiked = updated.has(songId);
+
+    alreadyLiked ? updated.delete(songId) : updated.add(songId);
+    setLikedSongIds(new Set(updated));
+    console.log('Updated liked song IDs:', likedSongIds);
+    console.log('Already liked:', alreadyLiked);
+
+    try {
+      if (alreadyLiked) {
+        await unlikeSong(songId);
+        console.log('Song unliked:', songId);
+      } else {
+        await likeSong(songId);
+        console.log('Song liked:', songId);
+      }
+    } catch (err) {
+      console.error("Like toggle failed", err);
+      alreadyLiked ? updated.add(songId) : updated.delete(songId);
+      setLikedSongIds(new Set(updated));
+    } finally {
+      await fetchPlaylists();
+    } 
+  };
+
+  const handleAddSongToPlaylist = async (dto:AddToPlaylistDto) => {
+    addSongToPlaylist(dto).then((response:ServerResponse) => {  
+      if (response.status === 200) {
+        console.log('Song added to playlist:', response.data);
+        fetchPlaylists();
+      } else {
+        console.error('Error adding song to playlist:', response.data);
+      }
+    }).catch((error) => {
+      console.error('Error adding song to playlist:', error);
+    }
+    );
+  }
+
+  const spinner = (
+    <Col xs={12} className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+      <Spinner animation="border" role="status" variant="primary" />
+      <span className="visually-hidden">Loading...</span>
+    </Col>
+  );
+
+  const [playingAll, setPlayingAll] = useState(false);
+
+  const [deletePlaylistLoading, setDeletePlaylistLoading] = useState(false);
+
   const playCurrentPlayList = () => {
-    currentPlaylist.tracks.forEach((track) => {
+    if (currentPlaylist.tracks.length === 0) return
+    setPlayingAll(true);
+    clearQueue();
+    stop();
+    currentPlaylist.tracks.forEach(track => {
       addSongToQueue(track);
+    });
+    setPlayingAll(false);
+  };
+
+  const handleDeleteSongFromPlaylist = (song: SongMetadata) => {
+    if (!selectedPlaylist || selectedPlaylist === 'liked') return;
+    deleteSongFromPlaylist(selectedPlaylist, song.id).then((response:ServerResponse) => {
+      if (response.status === 200) {
+        console.log('Song deleted from playlist:', response.data);
+        fetchPlaylists();
+        if(currentPlaylist.tracks.length === 0) {
+          setSelectedPlaylist('liked');
+        }
+      } else {
+        console.error('Error deleting song from playlist:', response.data);
+      }
+    }).catch((error) => {
+      console.error('Error deleting song from playlist:', error);
+    });
+  }
+  const handleDeletePlaylist = (playlistName: string) => {
+    setDeletePlaylistLoading(true);
+    deletePlaylist(playlistName).then((response:ServerResponse) => {
+      if (response.status === 200) {
+        console.log('Playlist deleted:', response.data);
+        fetchPlaylists();
+        setSelectedPlaylist('liked');
+        setDeletePlaylistLoading(false);
+      } else {
+        console.error('Error deleting playlist:', response.data);
+      }
+    } ).catch((error) => {  
+      console.error('Error deleting playlist:', error);
     });
   }
 
+  
   return (
     <Container fluid className="p-4 mb-5">
       <div className="d-flex flex-column min-vh-100">
@@ -55,7 +226,7 @@ const Dashboard = () => {
           {/* Playlists Selector */}
           <div className="d-flex mb-4">
             <ButtonGroup>
-              {mockPlaylists.map((pl) => (
+              {playlists.map((pl) => (
                 <Button
                   key={pl.id}
                   variant={pl.id === selectedPlaylist ? 'primary' : 'outline-light'}
@@ -95,19 +266,30 @@ const Dashboard = () => {
           </Row>
 
           <Button
+            disabled={playingAll}
             variant="primary"
-            className="shadow-lg mb-4"
+            className="shadow-lg m-1 mb-4"
             onClick={() => {
-              clearQueue();
-              stop();
               playCurrentPlayList();   
             }}
           >
-            <FaPlay/> Play All
+            {playingAll ? <Spinner animation="border" size="sm" /> : <FaPlay />} Play All
+          </Button>
+          
+          <Button
+            hidden={selectedPlaylist === 'liked'}
+            variant="primary"
+            className="shadow-lg m-1 mb-4"
+            onClick={() => {
+              handleDeletePlaylist(selectedPlaylist);   
+            }}
+          >
+            {deletePlaylistLoading ? <Spinner animation="border" size="sm" /> : <FaDeleteLeft />} Delete Playlist
           </Button>
           {/* Tracks Display */}
-          {viewMode === 'grid' ? (
+          { loadingPlaylists ? spinner : (viewMode === 'grid' ? (
             <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+              
               {displayedTracks.length ? (
                 displayedTracks.map((item) => (
                   <Col key={item.id} className="d-flex">
@@ -116,7 +298,7 @@ const Dashboard = () => {
                         <Card.Img
                           src={item.coverArt}
                           alt={item.title}
-                          className="rounded-top"
+                          className="rounded-top fade-in"
                           style={{objectFit:'cover'}}
                         />
                         <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
@@ -131,11 +313,22 @@ const Dashboard = () => {
                               <FaPlay />
                             </Button>
                             <Button
+                              hidden={selectedPlaylist === 'liked'}
                               variant="light"
                               className="rounded-circle p-3 m-4 shadow-lg"
-                              onClick={() => addSongToQueue(item)}>
-                              <FaPlus />
+                              onClick={() => handleDeleteSongFromPlaylist(item)}
+                            >
+                              <FaDeleteLeft />
                             </Button>
+                            <SongActionMenu
+                                song={item}
+                                addSongToQueue={addSongToQueue}
+                                toggleLike={toggleLike}
+                                isLiked={isLiked}
+                                addSongToPlaylist={handleAddSongToPlaylist}
+                                getUserPlaylists={getUserPlaylists}
+                             />
+                            
                           </div>
                           <div className="text-center d-flex flex-column justify-content-between">
                             <div className="text-light mb-1 fs-6 text-truncate">
@@ -151,23 +344,23 @@ const Dashboard = () => {
                   </Col>
                 ))
               ) : (
-                <div className="w-100 text-center py-5">
-                  <Spinner animation="border" variant="light" />
+                <div className="w-100 text-center text-light py-5 fs-5">
+                  No songs found in this playlist.
                 </div>
-              )}
+              )}  
             </Row>
           ) : (
             <ListGroup variant="flush" >
-              {displayedTracks.map((track) => (
+              {displayedTracks.length ? (displayedTracks.map((track) => (
                 <ListGroup.Item
                   key={track.id}
-                  className="bg-dark text-light d-flex justify-content-between align-items-center py-3 border-secondary rounded-2 mb-2"
+                  className="bg-dark text-light d-flex justify-content-between align-items-center py-1 border-secondary rounded-2 mb-1"
                 >
                   <div className="d-flex align-items-center">
                     <img
                       src={track.coverArt}
                       alt={track.title}
-                      className="rounded me-3"
+                      className="rounded me-3 fade-in"
                       style={{ width: 60, height: 60, objectFit: 'cover' }}
                     />
                     <div>
@@ -181,35 +374,54 @@ const Dashboard = () => {
                   </div>
                   <div className='ms-auto gap-2 d-flex'>
                     <Button variant="primary"
-                      className="rounded-circle shadow-lg"
+                      className="rounded-circle p-3 m-4 shadow-lg"
                       onClick={() => playTrackSong(track)}>
                       <FaPlay />
                     </Button>
                     <Button
-                      variant="primary"
-                      className="rounded-circle shadow-lg"
-                      onClick={() => addSongToQueue(track)}>
-                      <FaPlus />
+                      hidden={selectedPlaylist === 'liked'}
+                      variant="light"
+                      className="rounded-circle p-3 m-4 shadow-lg"
+                      onClick={() => handleDeleteSongFromPlaylist(track)}
+                    >
+                      <FaDeleteLeft />
                     </Button>
+                    <SongActionMenu
+                      song={track}
+                      addSongToQueue={addSongToQueue}
+                      toggleLike={toggleLike}
+                      isLiked={isLiked}
+                      addSongToPlaylist={handleAddSongToPlaylist}
+                      getUserPlaylists={getUserPlaylists}
+                    />
                   </div>
                 </ListGroup.Item>
-              ))}
+              ))) : (
+                <div className="w-100 text-center text-light py-5 fs-5">
+                  No songs found in this playlist.
+                </div>
+              )}  
             </ListGroup>
-          )}
+          ))}
 
           {/* Recently Played */}
-          <h2 className="mt-5 mb-3 text-light border-secondary border-bottom pb-2">
-            Recently Played
-          </h2>
-          <Row xs={2} sm={3} md={4} lg={4} className="g-3">
-            {mockTracks.slice(0, 4).map((item) => (
+          <div className="d-flex mt-5 mb-3 text-light border-secondary border-bottom pb-2">
+            <h4 className="fw-bold mb-0">Recently Played</h4>
+            <div className="d-flex ms-auto">
+              <Button
+                variant="primary"
+                className="shadow-lg mb-4" onClick={fetchRecentlyPlayedSongs}> <MdRefresh /> </Button>
+            </div>
+          </div>
+          <Row xs={2} sm={3} md={4} lg={5} className="g-3">
+            {recentLoading ? spinner : recent.map((item:SongMetadata) => (
               <Col key={item.id} className="d-flex">
                 <Card className="music-card h-100 border-0 shadow-sm">
                   <div className="position-relative image-container">
                     <Card.Img
                       src={item.coverArt}
                       alt={item.title}
-                      className="rounded-top"
+                      className="rounded-top fade-in"
                       style={{objectFit:'cover'}}
                     />
                     <Card.ImgOverlay className="overlay d-flex flex-column justify-content-center align-items-center">
@@ -223,12 +435,14 @@ const Dashboard = () => {
                         >
                           <FaPlay />
                         </Button>
-                        <Button
-                          variant="light"
-                          className="rounded-circle p-3 m-4 shadow-lg"
-                          onClick={() => addSongToQueue(item)}>
-                          <FaPlus />
-                        </Button>
+                        <SongActionMenu
+                            song={item}
+                            addSongToQueue={addSongToQueue}
+                            toggleLike={toggleLike}
+                            isLiked={isLiked}
+                            addSongToPlaylist={handleAddSongToPlaylist}
+                            getUserPlaylists={getUserPlaylists}
+                        />
                       </div>
                       <div className="text-center d-flex flex-column justify-content-between">
                         <div className="text-light mb-1 fs-6 text-truncate">
