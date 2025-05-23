@@ -25,7 +25,6 @@ target/
 .gradle/
 build/
 out/
-.env
 *.bat
 *.sh
 *.swp
